@@ -1,0 +1,31 @@
+timeagent:
+   values:
+      agent-name: my-first-agent
+      max-limit-search: 50
+      swagger:
+         title: timeagent
+         description: "scheduled or manual execution of agents"
+         version: 0.1.0-SNAPSHOT
+         license: "Apache License, Version 2.0"
+         license-url: "https://www.apache.org/licenses/LICENSE-2.0"
+         contact:
+            company: smithx
+            url: "https://www.smithx.org"
+            mail: mail@smithx.org
+   datasource:
+      driver-class-name: org.h2.Driver
+      jdbcUrl: jdbc:h2:mem:db_timeagent;DB_CLOSE_DELAY=-1
+      username: sa
+      password: sa
+spring:
+   jpa:
+      show-sql: false
+      hibernate:
+         ddl-auto: update
+server:
+   servlet:
+      context-path: /timeagent
+management:
+   endpoint:
+      health:
+         show-details: ALWAYS
