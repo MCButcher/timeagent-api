@@ -23,5 +23,5 @@ package org.smithx.timeagent.api.exceptions;
  * 
  */
 public enum TimeAgentExceptionCause {
-  INVALID_SEARCH_MODEL
+  INVALID_SEARCH_MODEL, ALREADY_RUNNING
 }

@@ -32,7 +32,7 @@ import org.springframework.stereotype.Repository;
  * 
  */
 @Repository
-public interface findByAgentNameAndExecutorAndStartTimeExecutionAfterOrderByCreatedAtDesc extends CrudRepository<TimeAgentInfo, Long> {
+public interface TimeAgentInfoRepository extends CrudRepository<TimeAgentInfo, Long> {
   public List<TimeAgentInfo> findByAgentNameOrderByCreatedAtDesc(String agentName, Pageable pagable);
 
   public List<TimeAgentInfo> findByAgentNameAndStatusOrderByCreatedAtDesc(String agentName, TimeAgentStatus status, Pageable pagable);

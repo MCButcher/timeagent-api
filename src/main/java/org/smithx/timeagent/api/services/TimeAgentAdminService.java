@@ -15,34 +15,37 @@
  */
 package org.smithx.timeagent.api.services;
 
+import org.smithx.timeagent.api.agent.TimeAgent;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
+import org.smithx.timeagent.api.models.TimeAgentArgument;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.repositories.TimeAgentInfoRepository;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.smithx.timeagent.api.threads.TimeAgentRunnable;
+import org.springframework.stereotype.Service;
 
 /**
- * abstract service for the all implementation of services
+ * service for the administration of an agent.
  *
  * @author norman schmidt {smithx}
  * @since 12.05.2020
  * 
  */
-@Data
-@AllArgsConstructor
-public abstract class TimeAgentService {
-  private TimeAgentValues agentValues;
-  private TimeAgentInfoRepository agentInfoRepository;
-  private TimeAgentInfo agentInfo;
-
-  public TimeAgentInfo updateInfo() {
-    agentInfo = agentInfoRepository.save(agentInfo);
-    return agentInfo;
+@Service
+public class TimeAgentAdminService extends TimeAgentService {
+  public TimeAgentAdminService(TimeAgentValues agentValues, TimeAgentInfoRepository agentInfoRepository, TimeAgentInfo agentInfo) {
+    super(agentValues, agentInfoRepository, agentInfo);
   }
 
-  public TimeAgentInfo insertInfo() {
-    agentInfo.setId(null);
-    return updateInfo();
+  public void run(TimeAgentArgument... arguments) {
+    TimeAgentRunnable agent = new TimeAgentRunnable(new TimeAgent(this) {
+
+      @Override
+      protected void runImplementation(TimeAgentArgument... arguments) {
+        getAgentInfo().addProtocol("run implementation");
+      }
+
+    }, arguments);
+
+    agent.run();
   }
 }

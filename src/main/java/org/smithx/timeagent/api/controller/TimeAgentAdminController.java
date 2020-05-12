@@ -15,11 +15,8 @@
  */
 package org.smithx.timeagent.api.controller;
 
-import java.util.List;
-
-import org.smithx.timeagent.api.models.TimeAgentInfo;
-import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
-import org.smithx.timeagent.api.services.TimeAgentInfoService;
+import org.smithx.timeagent.api.models.TimeAgentArgument;
+import org.smithx.timeagent.api.services.TimeAgentAdminService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,36 +29,26 @@ import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 
 /**
- * controller for the info endpoints of an agent.
+ * controller for the administration endpoints of an agent.
  *
  * @author norman schmidt {smithx}
- * @since 07.05.2020
+ * @since 12.05.2020
  * 
  */
 @RestController
 @AllArgsConstructor
-@RequestMapping(path = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
-public class TimeAgentInfoController {
-  private TimeAgentInfoService service;
+@RequestMapping(path = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
+public class TimeAgentAdminController {
+  private TimeAgentAdminService service;
 
-  @GetMapping
-  @ApiOperation(value = "getting the current status and information of the agent")
+  @GetMapping(path = "/run", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "start the run of the agent at once")
   @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "ok"),
+      @ApiResponse(code = 200, message = "restart initiated successfully"),
+      @ApiResponse(code = 422, message = "agent already running"),
       @ApiResponse(code = 500, message = "internal error")
   })
-  public TimeAgentInfo getAgentInfo() {
-    return service.getAgentInfo();
+  public void run(@RequestBody(required = false) TimeAgentArgument... arguments) {
+    service.run(arguments);
   }
-
-  @GetMapping(path = "/search", consumes = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "searching for a past information of the agent")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "search successful"),
-      @ApiResponse(code = 500, message = "internal error")
-  })
-  public List<TimeAgentInfo> findAgentInfo(@RequestBody TimeAgentInfoSearch searchModel) {
-    return service.searchInfo(searchModel);
-  }
-
 }

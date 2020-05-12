@@ -29,12 +29,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
-import org.smithx.timeagent.api.exceptions.TimeAgentException;
+import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
-import org.smithx.timeagent.api.repositories.findByAgentNameAndExecutorAndStartTimeExecutionAfterOrderByCreatedAtDesc;
+import org.smithx.timeagent.api.repositories.TimeAgentInfoRepository;
 import org.springframework.data.domain.PageRequest;
 
 /**
@@ -45,17 +45,17 @@ import org.springframework.data.domain.PageRequest;
  * 
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class TimeAgentServiceTest {
+public class TimeAgentInfoServiceTest {
   static final String AGENTNAME = "agent";
   static final int MAX_SEARCH_VALUE = 50;
 
-  TimeAgentService serviceUnderTest;
+  TimeAgentInfoService serviceUnderTest;
 
   @Mock
   TimeAgentInfo timeAgentInfo;
 
   @Mock
-  findByAgentNameAndExecutorAndStartTimeExecutionAfterOrderByCreatedAtDesc repository;
+  TimeAgentInfoRepository repository;
 
   @Mock
   TimeAgentValues values;
@@ -66,7 +66,7 @@ public class TimeAgentServiceTest {
 
   @BeforeEach
   void beforeEach() {
-    serviceUnderTest = new TimeAgentService(values, repository, timeAgentInfo);
+    serviceUnderTest = new TimeAgentInfoService(values, repository, timeAgentInfo);
 
     searchModel = new TimeAgentInfoSearch();
     resultList = Arrays.asList(new TimeAgentInfo());
@@ -78,12 +78,12 @@ public class TimeAgentServiceTest {
 
   @Test
   void testTimeAgentInfo() {
-    assertEquals(AGENTNAME, serviceUnderTest.getInfo().getAgentName());
+    assertEquals(AGENTNAME, serviceUnderTest.getAgentInfo().getAgentName());
   }
 
   @Test
   void testSearchModelIsNull() {
-    TimeAgentException exception = assertThrows(TimeAgentException.class, () -> serviceUnderTest.searchInfo(null));
+    TimeAgentRuntimeException exception = assertThrows(TimeAgentRuntimeException.class, () -> serviceUnderTest.searchInfo(null));
     assertEquals(TimeAgentExceptionCause.INVALID_SEARCH_MODEL, exception.getErrorCause());
   }
 

@@ -13,30 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.smithx.timeagent.api.exceptions;
+package org.smithx.timeagent.api.threads;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.smithx.timeagent.api.agent.TimeAgent;
+import org.smithx.timeagent.api.models.TimeAgentArgument;
+
+import lombok.Getter;
 
 /**
- * exception throwing, when an error in the implementation occurs.
+ * TODO
  *
  * @author norman schmidt {smithx}
  * @since 12.05.2020
  * 
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor
-public class TimeAgentException extends Exception {
-  private static final long serialVersionUID = 1L;
+public class TimeAgentRunnable implements Runnable {
+  @Getter
+  private TimeAgentArgument[] arguments;
+  private TimeAgent agent;
 
-  private TimeAgentExceptionCause errorCause;
-  private String errorMessage;
+  public TimeAgentRunnable(TimeAgent agent, TimeAgentArgument... arguments) {
+    this.agent = agent;
+    this.arguments = arguments;
+  }
 
-  public String getFullErrorMessage() {
-    return String.format("%s: %s", errorCause.name(), errorMessage);
+  @Override
+  public void run() {
+    agent.run(arguments);
   }
 
 }

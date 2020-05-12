@@ -20,16 +20,16 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * exception throwing, when an error in the implementation occurs.
+ * exception, which is thrown in a specific case concerning the timeagent logic.
  *
  * @author norman schmidt {smithx}
- * @since 12.05.2020
+ * @since 08.05.2020
  * 
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class TimeAgentException extends Exception {
+public class TimeAgentRuntimeException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
   private TimeAgentExceptionCause errorCause;
@@ -38,5 +38,4 @@ public class TimeAgentException extends Exception {
   public String getFullErrorMessage() {
     return String.format("%s: %s", errorCause.name(), errorMessage);
   }
-
 }

@@ -30,16 +30,13 @@ import org.junit.jupiter.api.Test;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
-import org.smithx.timeagent.api.services.TimeAgentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.smithx.timeagent.api.services.TimeAgentInfoService;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * testing the TimeAgentInfoController.
@@ -49,17 +46,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  */
 @WebMvcTest(TimeAgentInfoController.class)
-public class TimeAgentInfoControllerTest {
+public class TimeAgentInfoControllerTest extends TimeAgentControllerTest {
   @MockBean
-  TimeAgentService service;
-
-  @Autowired
-  ObjectMapper mapper;
+  TimeAgentInfoService service;
 
   TimeAgentInfo info;
-
-  @Autowired
-  MockMvc mvc;
 
   @BeforeEach
   void beforeEach() {
@@ -74,7 +65,7 @@ public class TimeAgentInfoControllerTest {
 
   @Test
   void testGetInfo() throws Exception {
-    when(service.getInfo()).thenReturn(info);
+    when(service.getAgentInfo()).thenReturn(info);
 
     MockHttpServletResponse response = mvc.perform(get("/info")).andExpect(status().is2xxSuccessful()).andReturn().getResponse();
     TimeAgentInfo mappedResponse = mapper.reader().forType(TimeAgentInfo.class).readValue(response.getContentAsString());

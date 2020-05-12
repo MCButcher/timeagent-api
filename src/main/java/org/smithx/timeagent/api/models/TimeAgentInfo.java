@@ -95,4 +95,8 @@ public class TimeAgentInfo extends TimeAgentModel {
   public void addProtocol(String message) {
     protocol.add(new TimeAgentProtocol(this, message));
   }
+
+  public void clearProtocol() {
+    protocol = new ArrayList<>();
+  }
 }

@@ -13,30 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.smithx.timeagent.api.exceptions;
+package org.smithx.timeagent.api.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * exception throwing, when an error in the implementation occurs.
+ * abstract class for all controller tests.
  *
  * @author norman schmidt {smithx}
  * @since 12.05.2020
  * 
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@AllArgsConstructor
-public class TimeAgentException extends Exception {
-  private static final long serialVersionUID = 1L;
+public abstract class TimeAgentControllerTest {
+  @Autowired
+  ObjectMapper mapper;
 
-  private TimeAgentExceptionCause errorCause;
-  private String errorMessage;
-
-  public String getFullErrorMessage() {
-    return String.format("%s: %s", errorCause.name(), errorMessage);
-  }
-
+  @Autowired
+  MockMvc mvc;
 }

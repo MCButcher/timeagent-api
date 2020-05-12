@@ -16,13 +16,13 @@
 package org.smithx.timeagent.api.models;
 
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.smithx.timeagent.api.models.TimeAgentInfo;
 
 /**
  * testing the TimeAgentInfo.
@@ -62,6 +62,13 @@ public class TimeAgentInfoTest {
     assertAll("check protocol message",
         () -> assertEquals(1, classUnderTest.getProtocol().size()),
         () -> assertEquals("first message", classUnderTest.getProtocol().get(0).getMessage()));
+  }
+
+  @Test
+  void testClearProtocol() {
+    classUnderTest.addProtocol("first message");
+    classUnderTest.clearProtocol();
+    assertTrue(classUnderTest.getProtocol().isEmpty());
   }
 
 }
