@@ -15,6 +15,8 @@
  */
 package org.smithx.timeagent.api.models;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,7 +31,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ApiModel(description = "model for setting arguments for a manual run")
 public class TimeAgentArgument {
+  @ApiModelProperty(value = "key of the argument")
   private String key;
+  @ApiModelProperty(value = "value of the argument")
   private String value;
 }
