@@ -44,7 +44,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "protocol")
-@ApiModel(description = "protocol for the agent info during a status")
+@ApiModel(description = "protocol for the agent info")
 public class TimeAgentProtocol extends TimeAgentModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
@@ -52,7 +52,6 @@ public class TimeAgentProtocol extends TimeAgentModel {
   private TimeAgentInfo info;
 
   @Getter
-  @ApiModelProperty(value = "a protocol message")
+  @ApiModelProperty(value = "a protocol message", example = "found 100 files")
   private String message;
-
 }

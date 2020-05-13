@@ -15,7 +15,10 @@
  */
 package org.smithx.timeagent.api.controller;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
 import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
-import org.smithx.timeagent.api.services.TimeAgentAdminService;
+import org.smithx.timeagent.api.services.TimeAgentService;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -38,7 +41,7 @@ import org.springframework.http.MediaType;
 @WebMvcTest(TimeAgentAdminController.class)
 public class TimeAgentAdminControllerTest extends TimeAgentControllerTest {
   @MockBean
-  TimeAgentAdminService service;
+  TimeAgentService service;
 
   @Test
   void testRunWithArguments() throws Exception {
@@ -60,6 +63,23 @@ public class TimeAgentAdminControllerTest extends TimeAgentControllerTest {
     doThrow(new TimeAgentRuntimeException(TimeAgentExceptionCause.ALREADY_RUNNING, "running")).when(service).run(arguments);
     mvc.perform(post("/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
         .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void testSetTrigger() throws Exception {
+    mvc.perform(post("/admin/trigger").contentType(MediaType.TEXT_PLAIN).content("trigger")).andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  void testSetInvalidTrigger() throws Exception {
+    when(service.setTrigger(anyString()))
+        .thenThrow(new TimeAgentRuntimeException(TimeAgentExceptionCause.INVALID_TRIGGER, "invalid trigger"));
+    mvc.perform(post("/admin/trigger").contentType(MediaType.TEXT_PLAIN).content("trigger")).andExpect(status().isNotAcceptable());
+  }
+
+  @Test
+  void testDeleteTrigger() throws Exception {
+    mvc.perform(delete("/admin/trigger")).andExpect(status().is2xxSuccessful());
   }
 
 }

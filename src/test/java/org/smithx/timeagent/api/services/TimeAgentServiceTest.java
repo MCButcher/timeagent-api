@@ -15,13 +15,18 @@
  */
 package org.smithx.timeagent.api.services;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,13 +34,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
-import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
+import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
 import org.smithx.timeagent.api.repositories.TimeAgentInfoRepository;
+import org.smithx.timeagent.api.threads.TimeAgentRunnable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 
 /**
  * testing the TimeAgentService.
@@ -45,11 +53,11 @@ import org.springframework.data.domain.PageRequest;
  * 
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class TimeAgentInfoServiceTest {
+public class TimeAgentServiceTest {
   static final String AGENTNAME = "agent";
   static final int MAX_SEARCH_VALUE = 50;
 
-  TimeAgentInfoService serviceUnderTest;
+  TimeAgentService serviceUnderTest;
 
   @Mock
   TimeAgentInfo timeAgentInfo;
@@ -60,25 +68,86 @@ public class TimeAgentInfoServiceTest {
   @Mock
   TimeAgentValues values;
 
+  @Mock
+  ThreadPoolTaskScheduler scheduler;
+
   TimeAgentInfoSearch searchModel;
   List<TimeAgentInfo> resultList;
   PageRequest pagable;
+  TimeAgentInfo initInfo;
 
   @BeforeEach
   void beforeEach() {
-    serviceUnderTest = new TimeAgentInfoService(values, repository, timeAgentInfo);
+    initInfo = new TimeAgentInfo(AGENTNAME, TimeAgentStatus.READY);
+    when(repository.save(any(TimeAgentInfo.class))).thenReturn(initInfo);
+    when(values.getAgentName()).thenReturn(AGENTNAME);
+    when(values.getMaxLimitSearch()).thenReturn(MAX_SEARCH_VALUE);
+
+    serviceUnderTest = new TimeAgentService(values, repository, scheduler);
 
     searchModel = new TimeAgentInfoSearch();
     resultList = Arrays.asList(new TimeAgentInfo());
     pagable = PageRequest.of(0, MAX_SEARCH_VALUE);
 
-    when(timeAgentInfo.getAgentName()).thenReturn(AGENTNAME);
-    when(values.getMaxLimitSearch()).thenReturn(MAX_SEARCH_VALUE);
+    serviceUnderTest.initInfo();
   }
 
   @Test
   void testTimeAgentInfo() {
     assertEquals(AGENTNAME, serviceUnderTest.getAgentInfo().getAgentName());
+    assertEquals(TimeAgentStatus.READY, serviceUnderTest.getAgentInfo().getStatus());
+  }
+
+  @Test
+  void testTimeAgentInfoWithDatabaseEntry() {
+    initInfo.setStatus(TimeAgentStatus.FINISHED);
+    when(repository.findTop1ByAgentNameOrderByUpdatedAtDesc(anyString())).thenReturn(initInfo);
+    serviceUnderTest.initInfo();
+    assertEquals(AGENTNAME, serviceUnderTest.getAgentInfo().getAgentName());
+    assertEquals(TimeAgentStatus.READY, serviceUnderTest.getAgentInfo().getStatus());
+  }
+
+  @Test
+  void testSetTrigger() {
+    serviceUnderTest.initAgent();
+
+    String trigger = "0 0 0 1/1 * ?";
+    initInfo.setCrontrigger(trigger);
+
+    TimeAgentInfo result = serviceUnderTest.setTrigger(trigger);
+    assertEquals(trigger, result.getCrontrigger());
+  }
+
+  @Test
+  void testSetTriggerThrowsException() {
+    String trigger = "xyz";
+    TimeAgentRuntimeException exception = assertThrows(TimeAgentRuntimeException.class, () -> serviceUnderTest.setTrigger(trigger));
+    assertEquals(TimeAgentExceptionCause.INVALID_TRIGGER, exception.getErrorCause());
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @Test
+  void testDeleteTriggerAfterSetTrigger() {
+    ScheduledFuture future = mock(ScheduledFuture.class);
+    when(scheduler.schedule(any(TimeAgentRunnable.class), any(CronTrigger.class))).thenReturn(future);
+    when(future.cancel(false)).thenReturn(true);
+
+    String trigger = "0 0 0 1/1 * ?";
+    initInfo.setCrontrigger(trigger);
+
+    serviceUnderTest.initAgent();
+    serviceUnderTest.setTrigger(trigger);
+
+    initInfo.deleteCrontrigger();
+
+    TimeAgentInfo result = serviceUnderTest.deleteTrigger();
+    assertNull(result.getCrontrigger());
+  }
+
+  @Test
+  void testDeleteTrigger() {
+    TimeAgentInfo result = serviceUnderTest.deleteTrigger();
+    assertNull(result.getCrontrigger());
   }
 
   @Test
@@ -90,7 +159,7 @@ public class TimeAgentInfoServiceTest {
   @Test
   void testSearchModelHasNoSearchValues() {
 
-    when(repository.findByAgentNameOrderByCreatedAtDesc(AGENTNAME, pagable)).thenReturn(resultList);
+    when(repository.findByAgentNameOrderByUpdatedAtDesc(AGENTNAME, pagable)).thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
 
@@ -98,7 +167,7 @@ public class TimeAgentInfoServiceTest {
   void testSearchModelHasLimitOverMax() {
     searchModel.setLimit(100);
 
-    when(repository.findByAgentNameOrderByCreatedAtDesc(AGENTNAME, pagable)).thenReturn(resultList);
+    when(repository.findByAgentNameOrderByUpdatedAtDesc(AGENTNAME, pagable)).thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
 
@@ -107,7 +176,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setLimit(10);
     pagable = PageRequest.of(0, 10);
 
-    when(repository.findByAgentNameOrderByCreatedAtDesc(AGENTNAME, pagable)).thenReturn(resultList);
+    when(repository.findByAgentNameOrderByUpdatedAtDesc(AGENTNAME, pagable)).thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
 
@@ -115,7 +184,7 @@ public class TimeAgentInfoServiceTest {
   void testSearchModelHasStatus() {
     searchModel.setStatus(TimeAgentStatus.FINISHED);
 
-    when(repository.findByAgentNameAndStatusOrderByCreatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED, pagable)).thenReturn(resultList);
+    when(repository.findByAgentNameAndStatusOrderByUpdatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED, pagable)).thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
 
@@ -123,7 +192,7 @@ public class TimeAgentInfoServiceTest {
   void testSearchModelHasExecutor() {
     searchModel.setExecutor("user");
 
-    when(repository.findByAgentNameAndExecutorOrderByCreatedAtDesc(AGENTNAME, "user", pagable)).thenReturn(resultList);
+    when(repository.findByAgentNameAndExecutorOrderByUpdatedAtDesc(AGENTNAME, "user", pagable)).thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
 
@@ -132,7 +201,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setExecutor("user");
     searchModel.setStatus(TimeAgentStatus.FINISHED);
 
-    when(repository.findByAgentNameAndStatusAndExecutorOrderByCreatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED, "user", pagable))
+    when(repository.findByAgentNameAndStatusAndExecutorOrderByUpdatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED, "user", pagable))
         .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
@@ -142,7 +211,7 @@ public class TimeAgentInfoServiceTest {
     LocalDateTime fromStartTimeExecution = LocalDateTime.now();
     searchModel.setFromStartTimeExecution(fromStartTimeExecution);
 
-    when(repository.findByAgentNameAndStartTimeExecutionAfterOrderByCreatedAtDesc(AGENTNAME, fromStartTimeExecution, pagable))
+    when(repository.findByAgentNameAndStartTimeExecutionAfterOrderByUpdatedAtDesc(AGENTNAME, fromStartTimeExecution, pagable))
         .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
@@ -153,7 +222,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setFromStartTimeExecution(fromStartTimeExecution);
     searchModel.setStatus(TimeAgentStatus.FINISHED);
 
-    when(repository.findByAgentNameAndStatusAndStartTimeExecutionAfterOrderByCreatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED,
+    when(repository.findByAgentNameAndStatusAndStartTimeExecutionAfterOrderByUpdatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED,
         fromStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -166,7 +235,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setStatus(TimeAgentStatus.FINISHED);
     searchModel.setExecutor("user");
 
-    when(repository.findByAgentNameAndStatusAndExecutorAndStartTimeExecutionAfterOrderByCreatedAtDesc(AGENTNAME,
+    when(repository.findByAgentNameAndStatusAndExecutorAndStartTimeExecutionAfterOrderByUpdatedAtDesc(AGENTNAME,
         TimeAgentStatus.FINISHED, "user", fromStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -177,7 +246,7 @@ public class TimeAgentInfoServiceTest {
     LocalDateTime toStartTimeExecution = LocalDateTime.now();
     searchModel.setToStartTimeExecution(toStartTimeExecution);
 
-    when(repository.findByAgentNameAndStartTimeExecutionBeforeOrderByCreatedAtDesc(AGENTNAME, toStartTimeExecution, pagable))
+    when(repository.findByAgentNameAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(AGENTNAME, toStartTimeExecution, pagable))
         .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
   }
@@ -188,7 +257,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setToStartTimeExecution(toStartTimeExecution);
     searchModel.setStatus(TimeAgentStatus.FINISHED);
 
-    when(repository.findByAgentNameAndStatusAndStartTimeExecutionBeforeOrderByCreatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED,
+    when(repository.findByAgentNameAndStatusAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(AGENTNAME, TimeAgentStatus.FINISHED,
         toStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -201,7 +270,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setStatus(TimeAgentStatus.FINISHED);
     searchModel.setExecutor("user");
 
-    when(repository.findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBeforeOrderByCreatedAtDesc(AGENTNAME,
+    when(repository.findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(AGENTNAME,
         TimeAgentStatus.FINISHED, "user", toStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -216,7 +285,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setStatus(TimeAgentStatus.FINISHED);
     searchModel.setExecutor("user");
 
-    when(repository.findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBetweenOrderByCreatedAtDesc(AGENTNAME,
+    when(repository.findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(AGENTNAME,
         TimeAgentStatus.FINISHED, "user", fromStartTimeExecution, toStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -230,7 +299,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setFromStartTimeExecution(fromStartTimeExecution);
     searchModel.setStatus(TimeAgentStatus.FINISHED);
 
-    when(repository.findByAgentNameAndStatusAndStartTimeExecutionBetweenOrderByCreatedAtDesc(AGENTNAME,
+    when(repository.findByAgentNameAndStatusAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(AGENTNAME,
         TimeAgentStatus.FINISHED, fromStartTimeExecution, toStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -244,7 +313,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setFromStartTimeExecution(fromStartTimeExecution);
     searchModel.setExecutor("user");
 
-    when(repository.findByAgentNameAndExecutorAndStartTimeExecutionBetweenOrderByCreatedAtDesc(AGENTNAME,
+    when(repository.findByAgentNameAndExecutorAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(AGENTNAME,
         "user", fromStartTimeExecution, toStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -257,7 +326,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setToStartTimeExecution(toStartTimeExecution);
     searchModel.setFromStartTimeExecution(fromStartTimeExecution);
 
-    when(repository.findByAgentNameAndStartTimeExecutionBetweenOrderByCreatedAtDesc(AGENTNAME,
+    when(repository.findByAgentNameAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(AGENTNAME,
         fromStartTimeExecution, toStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -269,7 +338,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setToStartTimeExecution(toStartTimeExecution);
     searchModel.setExecutor("user");
 
-    when(repository.findByAgentNameAndExecutorAndStartTimeExecutionBeforeOrderByCreatedAtDesc(AGENTNAME, "user",
+    when(repository.findByAgentNameAndExecutorAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(AGENTNAME, "user",
         toStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));
@@ -281,7 +350,7 @@ public class TimeAgentInfoServiceTest {
     searchModel.setFromStartTimeExecution(fromStartTimeExecution);
     searchModel.setExecutor("user");
 
-    when(repository.findByAgentNameAndExecutorAndStartTimeExecutionAfterOrderByCreatedAtDesc(AGENTNAME, "user",
+    when(repository.findByAgentNameAndExecutorAndStartTimeExecutionAfterOrderByUpdatedAtDesc(AGENTNAME, "user",
         fromStartTimeExecution, pagable))
             .thenReturn(resultList);
     assertEquals(resultList, serviceUnderTest.searchInfo(searchModel));

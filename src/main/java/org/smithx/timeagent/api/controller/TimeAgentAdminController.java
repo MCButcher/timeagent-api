@@ -16,8 +16,10 @@
 package org.smithx.timeagent.api.controller;
 
 import org.smithx.timeagent.api.models.TimeAgentArgument;
-import org.smithx.timeagent.api.services.TimeAgentAdminService;
+import org.smithx.timeagent.api.models.TimeAgentInfo;
+import org.smithx.timeagent.api.services.TimeAgentService;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +31,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 
 /**
- * controller for the administration endpoints of an agent.
+ * controller for the administration of the agent.
  *
  * @author norman schmidt {smithx}
  * @since 12.05.2020
@@ -39,7 +41,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @RequestMapping(path = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TimeAgentAdminController {
-  private TimeAgentAdminService service;
+  private TimeAgentService service;
 
   @PostMapping(path = "/run", consumes = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "start the run of the agent at once")
@@ -51,4 +53,27 @@ public class TimeAgentAdminController {
   public void run(@RequestBody(required = false) TimeAgentArgument... arguments) {
     service.run(arguments);
   }
+
+  @PostMapping(path = "/trigger", consumes = MediaType.TEXT_PLAIN_VALUE)
+  @ApiOperation(value = "set a crontrigger for a scheduled execution")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "trigger set successfully"),
+      @ApiResponse(code = 406, message = "invalid trigger"),
+      @ApiResponse(code = 500, message = "internal error")
+  })
+  public TimeAgentInfo setTrigger(@RequestBody String value) {
+    return service.setTrigger(value);
+  }
+
+  @DeleteMapping(path = "/trigger")
+  @PostMapping(path = "/trigger", consumes = MediaType.TEXT_PLAIN_VALUE)
+  @ApiOperation(value = "delete a trigger to cancel a scheduled execution")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "trigger deleted successfully"),
+      @ApiResponse(code = 500, message = "internal error")
+  })
+  public void deleteTrigger() {
+    service.deleteTrigger();
+  }
+
 }

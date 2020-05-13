@@ -25,7 +25,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * repository for the info of an agent.
+ * repository for the info table of the agent.
  *
  * @author norman schmidt {smithx}
  * @since 08.05.2020
@@ -33,50 +33,51 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface TimeAgentInfoRepository extends CrudRepository<TimeAgentInfo, Long> {
-  public List<TimeAgentInfo> findByAgentNameOrderByCreatedAtDesc(String agentName, Pageable pagable);
+  public List<TimeAgentInfo> findByAgentNameOrderByUpdatedAtDesc(String agentName, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusOrderByCreatedAtDesc(String agentName, TimeAgentStatus status, Pageable pagable);
+  public List<TimeAgentInfo> findByAgentNameAndStatusOrderByUpdatedAtDesc(String agentName, TimeAgentStatus status, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndExecutorOrderByCreatedAtDesc(String agentName, String lastExecutor, Pageable pagable);
+  public List<TimeAgentInfo> findByAgentNameAndExecutorOrderByUpdatedAtDesc(String agentName, String lastExecutor, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorOrderByCreatedAtDesc(String agentName, TimeAgentStatus status,
+  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorOrderByUpdatedAtDesc(String agentName, TimeAgentStatus status,
       String lastExecutor, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStartTimeExecutionAfterOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStartTimeExecutionAfterOrderByUpdatedAtDesc(String agentName,
       LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStartTimeExecutionBeforeOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(String agentName,
       LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndExecutorAndStartTimeExecutionAfterOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndExecutorAndStartTimeExecutionAfterOrderByUpdatedAtDesc(String agentName,
       String lastExecutor, LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndExecutorAndStartTimeExecutionBeforeOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndExecutorAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(String agentName,
       String lastExecutor, LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusAndStartTimeExecutionAfterOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStatusAndStartTimeExecutionAfterOrderByUpdatedAtDesc(String agentName,
       TimeAgentStatus status, LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusAndStartTimeExecutionBeforeOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStatusAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(String agentName,
       TimeAgentStatus status, LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorAndStartTimeExecutionAfterOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorAndStartTimeExecutionAfterOrderByUpdatedAtDesc(String agentName,
       TimeAgentStatus status, String lastExecutor, LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBeforeOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBeforeOrderByUpdatedAtDesc(String agentName,
       TimeAgentStatus status, String lastExecutor, LocalDateTime startTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStartTimeExecutionBetweenOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(String agentName,
       LocalDateTime fromStartTimeLastExecution, LocalDateTime toStartTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusAndStartTimeExecutionBetweenOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStatusAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(String agentName,
       TimeAgentStatus status, LocalDateTime fromStartTimeLastExecution, LocalDateTime toStartTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndExecutorAndStartTimeExecutionBetweenOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndExecutorAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(String agentName,
       String lastExecutor, LocalDateTime fromStartTimeLastExecution, LocalDateTime toStartTimeLastExecution, Pageable pagable);
 
-  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBetweenOrderByCreatedAtDesc(String agentName,
+  public List<TimeAgentInfo> findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(String agentName,
       TimeAgentStatus status, String lastExecutor, LocalDateTime fromStartTimeLastExecution, LocalDateTime toStartTimeLastExecution,
       Pageable pagable);
 
+  public TimeAgentInfo findTop1ByAgentNameOrderByUpdatedAtDesc(String agentName);
 }

@@ -30,9 +30,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.support.CronSequenceGenerator;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -40,6 +38,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * entity of the status information of an agent.
@@ -49,39 +48,44 @@ import lombok.EqualsAndHashCode;
  * 
  */
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Component
 @Table(name = "info")
-@ApiModel(description = "model for the current info of the agent")
+@ApiModel(description = "model for the info model of the agent")
 public class TimeAgentInfo extends TimeAgentModel {
-  @Column(nullable = false, updatable = false, length = 100)
-  @Value("${timeagent.values.agent-name}")
-  @ApiModelProperty(value = "unique name of the agent")
+  @Column(nullable = false, updatable = false, length = 60)
+  @ApiModelProperty(value = "name of the agent set by the property 'timeagent.values.agent-name'", example = "my-first-agent")
   private String agentName;
 
-  @Column(length = 50)
-  @ApiModelProperty(value = "crontrigger for scheduling the execution of the agent")
+  @Column(length = 30)
+  @ApiModelProperty(value = "crontrigger for scheduling the execution of the agent", example = "0 0/3 * 1/1 * ?")
   private String crontrigger;
 
   @Column(length = 30)
-  @ApiModelProperty(value = "user, who executed the agent")
+  @ApiModelProperty(value = "user, who executed the agent", example = "x123456")
   private String executor;
 
-  @ApiModelProperty(value = "start time, when the agent was executed")
+  @ApiModelProperty(value = "start time, when the agent was executed", example = "2020-01-01T12:00:00.000000")
   private LocalDateTime startTimeExecution;
-  @ApiModelProperty(value = "time, when the agent has finished the execution")
+
+  @ApiModelProperty(value = "time, when the agent has finished the execution", example = "2020-01-01T12:00:00.000000")
   private LocalDateTime finishTimeExecution;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
-  @ApiModelProperty(value = "current status of the agent")
+  @ApiModelProperty(value = "current status of the agent", example = "RUNNING")
   private TimeAgentStatus status;
 
   @OneToMany(mappedBy = "info", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
   @ApiModelProperty(value = "protocol entries of the agent for a certain status")
   private List<TimeAgentProtocol> protocol = new ArrayList<>();
+
+  public TimeAgentInfo(String agentName, TimeAgentStatus status) {
+    this.agentName = agentName;
+    this.status = status;
+  }
 
   @ApiModelProperty(value = "next start time of execution of the agent, when a crontrigger is set")
   public LocalDateTime getNextExecution() {
@@ -98,5 +102,18 @@ public class TimeAgentInfo extends TimeAgentModel {
 
   public void clearProtocol() {
     protocol = new ArrayList<>();
+  }
+
+  public void deleteCrontrigger() {
+    crontrigger = null;
+  }
+
+  public void init() {
+    super.init();
+    executor = null;
+    status = TimeAgentStatus.READY;
+    startTimeExecution = null;
+    finishTimeExecution = null;
+    clearProtocol();
   }
 }

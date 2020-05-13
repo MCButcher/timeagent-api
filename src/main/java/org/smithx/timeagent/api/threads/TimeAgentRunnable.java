@@ -21,7 +21,7 @@ import org.smithx.timeagent.api.models.TimeAgentArgument;
 import lombok.Getter;
 
 /**
- * TODO
+ * agent to run the implementation.
  *
  * @author norman schmidt {smithx}
  * @since 12.05.2020
@@ -32,9 +32,14 @@ public class TimeAgentRunnable implements Runnable {
   private TimeAgentArgument[] arguments;
   private TimeAgent agent;
 
-  public TimeAgentRunnable(TimeAgent agent, TimeAgentArgument... arguments) {
+  public TimeAgentRunnable(TimeAgent agent) {
     this.agent = agent;
+  }
+
+  public void run(TimeAgentArgument... arguments) {
     this.arguments = arguments;
+    run();
+    this.arguments = null;
   }
 
   @Override

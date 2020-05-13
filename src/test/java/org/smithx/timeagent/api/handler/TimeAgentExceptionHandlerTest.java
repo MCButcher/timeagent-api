@@ -63,13 +63,28 @@ public class TimeAgentExceptionHandlerTest {
         .handleException(new TimeAgentRuntimeException(TimeAgentExceptionCause.ALREADY_RUNNING, "running"));
 
     assertAll("check the error response",
+        () -> assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getBody().getStatus()),
         () -> assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode()),
         () -> assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), response.getStatusCodeValue()),
         () -> assertNotNull(response.getBody().getTimestamp()),
-        () -> assertEquals(422, response.getBody().getCode()),
-        () -> assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getBody().getStatus()),
+        () -> assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), response.getBody().getCode()),
         () -> assertEquals("running", response.getBody().getMessage()),
-        () -> assertEquals("ALREADY_RUNNING", response.getBody().getError()));
+        () -> assertEquals(TimeAgentExceptionCause.ALREADY_RUNNING.name(), response.getBody().getError()));
+  }
+
+  @Test
+  void testInvalidTriggerHandler() {
+    ResponseEntity<TimeAgentError> response = classUnderTest
+        .handleException(new TimeAgentRuntimeException(TimeAgentExceptionCause.INVALID_TRIGGER, "invalid trigger"));
+
+    assertAll("check the error response",
+        () -> assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getBody().getStatus()),
+        () -> assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode()),
+        () -> assertEquals(HttpStatus.NOT_ACCEPTABLE.value(), response.getStatusCodeValue()),
+        () -> assertNotNull(response.getBody().getTimestamp()),
+        () -> assertEquals(HttpStatus.NOT_ACCEPTABLE.value(), response.getBody().getCode()),
+        () -> assertEquals("invalid trigger", response.getBody().getMessage()),
+        () -> assertEquals(TimeAgentExceptionCause.INVALID_TRIGGER.name(), response.getBody().getError()));
   }
 
 }

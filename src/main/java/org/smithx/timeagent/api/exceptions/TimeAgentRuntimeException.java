@@ -20,7 +20,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * exception, which is thrown in a specific case concerning the timeagent logic.
+ * exception thrown when an error occurs while accessing one of the controller
+ * endpoints.
  *
  * @author norman schmidt {smithx}
  * @since 08.05.2020

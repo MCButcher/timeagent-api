@@ -33,8 +33,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @ApiModel(description = "model for setting arguments for a manual run")
 public class TimeAgentArgument {
-  @ApiModelProperty(value = "key of the argument")
+  @ApiModelProperty(value = "key of the argument", example = "file.name")
   private String key;
-  @ApiModelProperty(value = "value of the argument")
+
+  @ApiModelProperty(value = "value of the argument", example = "/path/file")
   private String value;
 }

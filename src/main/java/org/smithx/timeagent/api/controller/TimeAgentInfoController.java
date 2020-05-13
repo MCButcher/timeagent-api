@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
-import org.smithx.timeagent.api.services.TimeAgentInfoService;
+import org.smithx.timeagent.api.services.TimeAgentService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
 
 /**
- * controller for the info endpoints of an agent.
+ * controller to access the agent info.
  *
  * @author norman schmidt {smithx}
  * @since 07.05.2020
@@ -43,7 +43,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @RequestMapping(path = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TimeAgentInfoController {
-  private TimeAgentInfoService service;
+  private TimeAgentService service;
 
   @GetMapping
   @ApiOperation(value = "getting the current status and information of the agent")

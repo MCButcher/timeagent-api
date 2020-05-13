@@ -20,7 +20,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
- * exception throwing, when an error in the implementation occurs.
+ * exception, which can be thrown inside the implementation and which terminates
+ * the execution.
  *
  * @author norman schmidt {smithx}
  * @since 12.05.2020

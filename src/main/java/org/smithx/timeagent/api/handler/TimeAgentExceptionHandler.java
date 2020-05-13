@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
- * exception handler for the controllers.
+ * exception handler for the timeagent controllers.
  *
  * @author norman schmidt {smithx}
  * @since 12.05.2020
@@ -40,6 +40,9 @@ public class TimeAgentExceptionHandler {
     case ALREADY_RUNNING:
       return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
           .body(new TimeAgentError(HttpStatus.UNPROCESSABLE_ENTITY, exception));
+    case INVALID_TRIGGER:
+      return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+          .body(new TimeAgentError(HttpStatus.NOT_ACCEPTABLE, exception));
     default:
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(new TimeAgentError(HttpStatus.INTERNAL_SERVER_ERROR, exception));

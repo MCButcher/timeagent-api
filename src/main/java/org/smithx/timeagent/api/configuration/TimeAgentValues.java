@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import lombok.Data;
 
 /**
- * values from the properties.
+ * values for the agent from the properties.
  *
  * @author norman schmidt {smithx}
  * @since 08.05.2020

@@ -34,15 +34,19 @@ import lombok.Getter;
 @Getter
 @ApiModel(description = "model for the error response of the agent")
 public class TimeAgentError {
-  @ApiModelProperty(value = "time when the error occured")
+  @ApiModelProperty(value = "time when the error occured", example = "2020-01-01T12:00:00.000000")
   private LocalDateTime timestamp;
-  @ApiModelProperty(value = "name of the http status")
+
+  @ApiModelProperty(value = "name of the http status", example = "INTERNAL_SERVER_ERROR")
   private HttpStatus status;
-  @ApiModelProperty(value = "error code of the http status")
+
+  @ApiModelProperty(value = "error code of the http status", example = "500")
   private int code;
-  @ApiModelProperty(value = "cause of the exception")
+
+  @ApiModelProperty(value = "cause of the exception", example = "INVALID_TRIGGER")
   private String error;
-  @ApiModelProperty(value = "error message of the exception")
+
+  @ApiModelProperty(value = "error message of the exception", example = "invalid trigger")
   private String message;
 
   public TimeAgentError(HttpStatus status, TimeAgentRuntimeException exception) {

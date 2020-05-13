@@ -24,6 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -40,11 +41,21 @@ import lombok.Data;
 public abstract class TimeAgentModel {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @ApiModelProperty(value = "the generated id of the database")
+  @ApiModelProperty(value = "the generated id of the model", example = "1")
   private Long id;
 
   @Column(nullable = false, updatable = false)
   @CreationTimestamp
-  @ApiModelProperty(value = "the time of the entry into the database")
+  @ApiModelProperty(value = "the time of the model saved to the database", example = "2020-01-01T12:00:00.000000")
   private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  @ApiModelProperty(value = "the time of the model saved to the database", example = "2020-01-01T12:00:00.000000")
+  private LocalDateTime updatedAt;
+
+  public void init() {
+    id = null;
+    createdAt = null;
+    updatedAt = null;
+  }
 }

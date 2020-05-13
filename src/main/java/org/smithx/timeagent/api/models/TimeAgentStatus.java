@@ -15,6 +15,8 @@
  */
 package org.smithx.timeagent.api.models;
 
+import io.swagger.annotations.ApiModel;
+
 /**
  * enumeration for the status of an agent.
  *
@@ -22,6 +24,7 @@ package org.smithx.timeagent.api.models;
  * @since 07.05.2020
  * 
  */
+@ApiModel(description = "enum of valid status of the agent")
 public enum TimeAgentStatus {
   READY, RUNNING, FINISHED, ABORTED;
 }

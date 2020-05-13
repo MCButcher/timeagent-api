@@ -25,6 +25,7 @@ import org.smithx.timeagent.api.models.TimeAgentStatus;
 import org.smithx.timeagent.api.services.TimeAgentService;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -34,25 +35,11 @@ import lombok.extern.slf4j.Slf4j;
  * @since 12.05.2020
  * 
  */
+@Data
 @AllArgsConstructor
 @Slf4j
 public abstract class TimeAgent {
   private TimeAgentService service;
-
-  public void run(TimeAgentArgument... arguments) {
-    isAlreadyRunning();
-    setStatusStart();
-    logArguments(arguments);
-    try {
-      runImplementation(arguments);
-      setStatusEnd(TimeAgentStatus.FINISHED);
-    } catch (TimeAgentException exception) {
-      logError(exception);
-    }
-    // send protocol
-  }
-
-  abstract protected void runImplementation(TimeAgentArgument... arguments) throws TimeAgentException;
 
   private void logArguments(TimeAgentArgument... arguments) {
     if (arguments == null || arguments.length == 0) {
@@ -81,16 +68,37 @@ public abstract class TimeAgent {
   }
 
   private void setStatusStart() {
+    log.info("start: " + service.getAgentInfo().getStatus());
     service.getAgentInfo().setStatus(TimeAgentStatus.RUNNING);
     service.getAgentInfo().setStartTimeExecution(LocalDateTime.now());
     service.getAgentInfo().clearProtocol();
-    service.insertInfo();
+    service.updateInfo();
   }
 
   private void setStatusEnd(TimeAgentStatus status) {
+    log.info("finish: " + service.getAgentInfo().getStatus());
     service.getAgentInfo().setStatus(status);
     service.getAgentInfo().setFinishTimeExecution(LocalDateTime.now());
     service.updateInfo();
+    log.info("end: " + service.getAgentInfo().getStatus());
+  }
+
+  abstract protected void runImplementation(TimeAgentArgument... arguments) throws TimeAgentException;
+
+  public void run(TimeAgentArgument... arguments) {
+    isAlreadyRunning();
+    setStatusStart();
+    logArguments(arguments);
+    try {
+      log.info("start agent");
+      runImplementation(arguments);
+      log.info("finish agent");
+      setStatusEnd(TimeAgentStatus.FINISHED);
+      service.initInfo();
+    } catch (TimeAgentException exception) {
+      logError(exception);
+    }
+    // send protocol
   }
 
 }

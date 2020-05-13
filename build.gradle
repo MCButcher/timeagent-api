@@ -6,6 +6,7 @@ plugins {
 
 group = 'org.smithx.timeagent'
 version = '0.1.0-SNAPSHOT'
+
 sourceCompatibility = '11'
 
 configurations {
@@ -19,17 +20,20 @@ repositories {
 }
 
 dependencies {
-	annotationProcessor 'org.projectlombok:lombok'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'io.springfox:springfox-swagger2:2.8.0'
-	implementation 'io.springfox:springfox-swagger-ui:2.8.0'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
-	testCompile 'org.junit.platform:junit-platform-engine:1.7.0-M1'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	def versionSwagger = "2.8.0"
+	def versionJunitEngine = "1.7.0-M1"
+
+	annotationProcessor group: 'org.projectlombok', name:'lombok'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+	implementation group: 'io.springfox', name: 'springfox-swagger2', version: versionSwagger
+	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versionSwagger
+	compileOnly group: 'org.projectlombok', name: 'lombok'
+	runtimeOnly group: 'com.h2database', name: 'h2'
+	testCompile group: 'org.junit.platform', name: 'junit-platform-engine', version: versionJunitEngine
+	testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 }
 
 test {

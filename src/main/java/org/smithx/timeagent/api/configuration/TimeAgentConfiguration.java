@@ -19,12 +19,15 @@ import java.util.Collections;
 
 import javax.sql.DataSource;
 
+import org.smithx.timeagent.api.models.TimeAgentInfo;
+import org.smithx.timeagent.api.models.TimeAgentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -51,6 +54,21 @@ public class TimeAgentConfiguration {
   @ConfigurationProperties(prefix = "timeagent.datasource")
   public DataSource dataSource() {
     return DataSourceBuilder.create().build();
+  }
+
+  @Bean
+  public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+    scheduler.setPoolSize(1);
+    scheduler.setThreadNamePrefix("timeagent-thread");
+    scheduler.setRemoveOnCancelPolicy(true);
+
+    return scheduler;
+  }
+
+  @Bean
+  public TimeAgentInfo agentInfo() {
+    return new TimeAgentInfo(values.getAgentName(), TimeAgentStatus.READY);
   }
 
   @Bean

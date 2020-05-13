@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -69,6 +71,42 @@ public class TimeAgentInfoTest {
     classUnderTest.addProtocol("first message");
     classUnderTest.clearProtocol();
     assertTrue(classUnderTest.getProtocol().isEmpty());
+  }
+
+  @Test
+  void testInitInfo() {
+    classUnderTest.addProtocol("first message");
+    classUnderTest.setId(1L);
+    classUnderTest.setAgentName("agent");
+    classUnderTest.setCreatedAt(LocalDateTime.now());
+    classUnderTest.setCrontrigger("* * * * * ?");
+    classUnderTest.setExecutor("user");
+    classUnderTest.setFinishTimeExecution(LocalDateTime.now());
+    classUnderTest.setStartTimeExecution(LocalDateTime.now());
+    classUnderTest.setStatus(TimeAgentStatus.RUNNING);
+    classUnderTest.setUpdatedAt(LocalDateTime.now());
+
+    classUnderTest.init();
+
+    assertAll("check init of info",
+        () -> assertTrue(classUnderTest.getProtocol().isEmpty()),
+        () -> assertNull(classUnderTest.getId()),
+        () -> assertNull(classUnderTest.getCreatedAt()),
+        () -> assertNull(classUnderTest.getExecutor()),
+        () -> assertNull(classUnderTest.getStartTimeExecution()),
+        () -> assertNull(classUnderTest.getFinishTimeExecution()),
+        () -> assertNull(classUnderTest.getUpdatedAt()),
+        () -> assertEquals("* * * * * ?", classUnderTest.getCrontrigger()),
+        () -> assertEquals(TimeAgentStatus.READY, classUnderTest.getStatus()),
+        () -> assertEquals("agent", classUnderTest.getAgentName()),
+        () -> assertTrue(classUnderTest.getProtocol().isEmpty()));
+  }
+
+  @Test
+  void testDeleteCrontrigger() {
+    classUnderTest.setCrontrigger("* * * * * ?");
+    classUnderTest.deleteCrontrigger();
+    assertNull(classUnderTest.getCrontrigger());
   }
 
 }

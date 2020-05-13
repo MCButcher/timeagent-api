@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
-import org.smithx.timeagent.api.services.TimeAgentInfoService;
+import org.smithx.timeagent.api.services.TimeAgentService;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -49,7 +49,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 @WebMvcTest(TimeAgentInfoController.class)
 public class TimeAgentInfoControllerTest extends TimeAgentControllerTest {
   @MockBean
-  TimeAgentInfoService service;
+  TimeAgentService service;
 
   TimeAgentInfo info;
 
