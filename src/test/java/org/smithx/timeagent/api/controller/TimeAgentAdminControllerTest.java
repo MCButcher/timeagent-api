@@ -16,7 +16,7 @@
 package org.smithx.timeagent.api.controller;
 
 import static org.mockito.Mockito.doThrow;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Test;
@@ -44,13 +44,13 @@ public class TimeAgentAdminControllerTest extends TimeAgentControllerTest {
   void testRunWithArguments() throws Exception {
     TimeAgentArgument[] arguments = { new TimeAgentArgument("test", "123") };
 
-    mvc.perform(get("/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
+    mvc.perform(post("/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
         .andExpect(status().is2xxSuccessful());
   }
 
   @Test
   void testRunWithoutArguments() throws Exception {
-    mvc.perform(get("/admin/run")).andExpect(status().is2xxSuccessful());
+    mvc.perform(post("/admin/run")).andExpect(status().is2xxSuccessful());
   }
 
   @Test
@@ -58,7 +58,7 @@ public class TimeAgentAdminControllerTest extends TimeAgentControllerTest {
     TimeAgentArgument[] arguments = { new TimeAgentArgument("test", "123") };
 
     doThrow(new TimeAgentRuntimeException(TimeAgentExceptionCause.ALREADY_RUNNING, "running")).when(service).run(arguments);
-    mvc.perform(get("/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
+    mvc.perform(post("/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
         .andExpect(status().isUnprocessableEntity());
   }
 

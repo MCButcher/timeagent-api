@@ -22,6 +22,7 @@ import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
 import org.smithx.timeagent.api.services.TimeAgentInfoService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,7 +55,7 @@ public class TimeAgentInfoController {
     return service.getAgentInfo();
   }
 
-  @GetMapping(path = "/search", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(path = "/search", consumes = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "searching for a past information of the agent")
   @ApiResponses(value = {
       @ApiResponse(code = 200, message = "search successful"),

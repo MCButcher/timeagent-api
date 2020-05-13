@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -85,7 +86,7 @@ public class TimeAgentInfoControllerTest extends TimeAgentControllerTest {
     when(service.searchInfo(searchModel)).thenReturn(Arrays.asList(new TimeAgentInfo()));
 
     MockHttpServletResponse response = mvc
-        .perform(get("/info/search").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(searchModel)))
+        .perform(post("/info/search").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(searchModel)))
         .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
     List<TimeAgentInfo> mappedResponse = mapper.readValue(response.getContentAsString(), new TypeReference<List<TimeAgentInfo>>() {});
     assertEquals(1, mappedResponse.size());
