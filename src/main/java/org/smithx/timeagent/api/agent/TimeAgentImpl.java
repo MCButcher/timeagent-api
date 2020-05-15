@@ -18,15 +18,28 @@ package org.smithx.timeagent.api.agent;
 import org.smithx.timeagent.api.exceptions.TimeAgentException;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
 import org.smithx.timeagent.api.services.TimeAgentService;
+import org.springframework.stereotype.Component;
 
 /**
- * agent to be implemented for the execution.
+ * TODO
  *
  * @author norman schmidt {smithx}
  * @since 14.05.2020
  * 
  */
-public abstract class TimeAgent {
+@Component
+public class TimeAgentImpl extends TimeAgent {
 
-  public abstract void execute(TimeAgentService service, TimeAgentArgument... arguments) throws TimeAgentException;
+  @Override
+  public void execute(TimeAgentService service, TimeAgentArgument... arguments) throws TimeAgentException {
+    String text = "dijaio afhapiof8934ui4höfja";
+    for (int i = 0; i < 100000000; i++) {
+      text.replaceAll("afhapiof8934ui4", "xxxxx");
+      if (i % 1000000 == 0) {
+        service.getAgentInfo().addProtocol(i + " done");
+        service.updateInfo();
+      }
+    }
+  }
+
 }

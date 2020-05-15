@@ -80,4 +80,6 @@ public interface TimeAgentInfoRepository extends CrudRepository<TimeAgentInfo, L
       Pageable pagable);
 
   public TimeAgentInfo findTop1ByAgentNameOrderByUpdatedAtDesc(String agentName);
+
+  public TimeAgentInfo findTop1ByAgentNameAndStatusOrderByUpdatedAtDesc(String agentName, TimeAgentStatus status);
 }

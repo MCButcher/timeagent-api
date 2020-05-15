@@ -26,5 +26,5 @@ import io.swagger.annotations.ApiModel;
  */
 @ApiModel(description = "enum of valid status of the agent")
 public enum TimeAgentStatus {
-  READY, RUNNING, FINISHED, ABORTED;
+  NOT_SET, READY, RUNNING, FINISHED, ABORTED;
 }

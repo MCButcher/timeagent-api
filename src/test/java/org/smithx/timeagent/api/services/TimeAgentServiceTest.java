@@ -33,7 +33,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.smithx.timeagent.api.agent.TimeAgent;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
+import org.smithx.timeagent.api.exceptions.TimeAgentException;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
 import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
@@ -69,6 +71,9 @@ public class TimeAgentServiceTest {
   TimeAgentValues values;
 
   @Mock
+  TimeAgent agent;
+
+  @Mock
   ThreadPoolTaskScheduler scheduler;
 
   TimeAgentInfoSearch searchModel;
@@ -77,13 +82,13 @@ public class TimeAgentServiceTest {
   TimeAgentInfo initInfo;
 
   @BeforeEach
-  void beforeEach() {
+  void beforeEach() throws TimeAgentException {
     initInfo = new TimeAgentInfo(AGENTNAME, TimeAgentStatus.READY);
     when(repository.save(any(TimeAgentInfo.class))).thenReturn(initInfo);
     when(values.getAgentName()).thenReturn(AGENTNAME);
     when(values.getMaxLimitSearch()).thenReturn(MAX_SEARCH_VALUE);
 
-    serviceUnderTest = new TimeAgentService(values, repository, scheduler);
+    serviceUnderTest = new TimeAgentService(agent, values, repository, scheduler);
 
     searchModel = new TimeAgentInfoSearch();
     resultList = Arrays.asList(new TimeAgentInfo());
@@ -99,7 +104,7 @@ public class TimeAgentServiceTest {
   }
 
   @Test
-  void testTimeAgentInfoWithDatabaseEntry() {
+  void testTimeAgentInfoWithDatabaseEntry() throws TimeAgentException {
     initInfo.setStatus(TimeAgentStatus.FINISHED);
     when(repository.findTop1ByAgentNameOrderByUpdatedAtDesc(anyString())).thenReturn(initInfo);
     serviceUnderTest.initInfo();
@@ -108,7 +113,7 @@ public class TimeAgentServiceTest {
   }
 
   @Test
-  void testSetTrigger() {
+  void testSetTrigger() throws TimeAgentException {
     serviceUnderTest.initAgent();
 
     String trigger = "0 0 0 1/1 * ?";
@@ -119,7 +124,7 @@ public class TimeAgentServiceTest {
   }
 
   @Test
-  void testSetTriggerThrowsException() {
+  void testSetTriggerThrowsExceptionInvalidTrigger() {
     String trigger = "xyz";
     TimeAgentRuntimeException exception = assertThrows(TimeAgentRuntimeException.class, () -> serviceUnderTest.setTrigger(trigger));
     assertEquals(TimeAgentExceptionCause.INVALID_TRIGGER, exception.getErrorCause());
@@ -127,7 +132,7 @@ public class TimeAgentServiceTest {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Test
-  void testDeleteTriggerAfterSetTrigger() {
+  void testDeleteTriggerAfterSetTrigger() throws TimeAgentException {
     ScheduledFuture future = mock(ScheduledFuture.class);
     when(scheduler.schedule(any(TimeAgentRunnable.class), any(CronTrigger.class))).thenReturn(future);
     when(future.cancel(false)).thenReturn(true);
@@ -145,7 +150,7 @@ public class TimeAgentServiceTest {
   }
 
   @Test
-  void testDeleteTrigger() {
+  void testDeleteTrigger() throws TimeAgentException {
     TimeAgentInfo result = serviceUnderTest.deleteTrigger();
     assertNull(result.getCrontrigger());
   }

@@ -55,31 +55,31 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "model for the info model of the agent")
 public class TimeAgentInfo extends TimeAgentModel {
   @Column(nullable = false, updatable = false, length = 60)
-  @ApiModelProperty(value = "name of the agent set by the property 'timeagent.values.agent-name'", example = "my-first-agent")
+  @ApiModelProperty(value = "name of the agent set by the property 'timeagent.values.agent-name'", example = "my-first-agent", position = 4)
   private String agentName;
 
   @Column(length = 30)
-  @ApiModelProperty(value = "crontrigger for scheduling the execution of the agent", example = "0 0/3 * 1/1 * ?")
+  @ApiModelProperty(value = "crontrigger for scheduling the execution of the agent", example = "0 0/3 * 1/1 * ?", position = 6)
   private String crontrigger;
 
   @Column(length = 30)
-  @ApiModelProperty(value = "user, who executed the agent", example = "x123456")
+  @ApiModelProperty(value = "user, who executed the agent", example = "x123456", position = 7)
   private String executor;
 
-  @ApiModelProperty(value = "start time, when the agent was executed", example = "2020-01-01T12:00:00.000000")
+  @ApiModelProperty(value = "start time, when the agent was executed", example = "2020-01-01T12:00:00.000000", position = 8)
   private LocalDateTime startTimeExecution;
 
-  @ApiModelProperty(value = "time, when the agent has finished the execution", example = "2020-01-01T12:00:00.000000")
+  @ApiModelProperty(value = "time, when the agent has finished the execution", example = "2020-01-01T12:00:00.000000", position = 9)
   private LocalDateTime finishTimeExecution;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
-  @ApiModelProperty(value = "current status of the agent", example = "RUNNING")
+  @ApiModelProperty(value = "current status of the agent", example = "RUNNING", position = 5)
   private TimeAgentStatus status;
 
   @OneToMany(mappedBy = "info", cascade = CascadeType.ALL, orphanRemoval = true)
   @JsonManagedReference
-  @ApiModelProperty(value = "protocol entries of the agent for a certain status")
+  @ApiModelProperty(value = "protocol entries of the agent for a certain status", position = 10)
   private List<TimeAgentProtocol> protocol = new ArrayList<>();
 
   public TimeAgentInfo(String agentName, TimeAgentStatus status) {

@@ -41,16 +41,16 @@ import lombok.Data;
 public abstract class TimeAgentModel {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @ApiModelProperty(value = "the generated id of the model", example = "1")
+  @ApiModelProperty(value = "the generated id of the model", example = "1", position = 1)
   private Long id;
 
   @Column(nullable = false, updatable = false)
   @CreationTimestamp
-  @ApiModelProperty(value = "the time of the model saved to the database", example = "2020-01-01T12:00:00.000000")
+  @ApiModelProperty(value = "the time of the model saved to the database", example = "2020-01-01T12:00:00.000000", position = 2)
   private LocalDateTime createdAt;
 
   @UpdateTimestamp
-  @ApiModelProperty(value = "the time of the model saved to the database", example = "2020-01-01T12:00:00.000000")
+  @ApiModelProperty(value = "the time of the model saved to the database", example = "2020-01-01T12:00:00.000000", position = 3)
   private LocalDateTime updatedAt;
 
   public void init() {

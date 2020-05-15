@@ -38,6 +38,7 @@ public class TimeAgentExceptionHandler {
 
     switch (cause) {
     case ALREADY_RUNNING:
+    case CANCEL_TRIGGER:
       return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
           .body(new TimeAgentError(HttpStatus.UNPROCESSABLE_ENTITY, exception));
     case INVALID_TRIGGER:

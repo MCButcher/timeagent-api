@@ -59,6 +59,7 @@ public class TimeAgentAdminController {
   @ApiResponses(value = {
       @ApiResponse(code = 200, message = "trigger set successfully"),
       @ApiResponse(code = 406, message = "invalid trigger"),
+      @ApiResponse(code = 422, message = "trigger cannot be cancelled"),
       @ApiResponse(code = 500, message = "internal error")
   })
   public TimeAgentInfo setTrigger(@RequestBody String value) {

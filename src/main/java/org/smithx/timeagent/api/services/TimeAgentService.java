@@ -21,8 +21,8 @@ import java.util.concurrent.ScheduledFuture;
 import javax.annotation.PostConstruct;
 
 import org.smithx.timeagent.api.agent.TimeAgent;
+import org.smithx.timeagent.api.agent.TimeAgentWorkflow;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
-import org.smithx.timeagent.api.exceptions.TimeAgentException;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
 import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
@@ -36,6 +36,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,23 +53,26 @@ public class TimeAgentService {
   private TimeAgentValues agentValues;
   private TimeAgentInfoRepository agentInfoRepository;
   private TimeAgentInfo agentInfo;
+  private TimeAgent agent;
 
-  private TimeAgentRunnable agent;
+  private TimeAgentRunnable agentRunnable;
   private ThreadPoolTaskScheduler scheduler;
   private ScheduledFuture<?> future;
 
-  public TimeAgentService(TimeAgentValues agentValues, TimeAgentInfoRepository agentInfoRepository, ThreadPoolTaskScheduler scheduler) {
+  public TimeAgentService(TimeAgent agent, TimeAgentValues agentValues, TimeAgentInfoRepository agentInfoRepository,
+      ThreadPoolTaskScheduler scheduler) {
+    this.agent = agent;
     this.agentValues = agentValues;
     this.agentInfoRepository = agentInfoRepository;
     this.scheduler = scheduler;
   }
 
-  public TimeAgentInfo updateInfo() {
-    agentInfo = agentInfoRepository.save(agentInfo);
+  public TimeAgentInfo getAgentInfo() {
     return agentInfo;
   }
 
-  public TimeAgentInfo getAgentInfo() {
+  public TimeAgentInfo updateInfo() {
+    agentInfo = agentInfoRepository.save(agentInfo);
     return agentInfo;
   }
 
@@ -135,6 +139,87 @@ public class TimeAgentService {
     return agentInfoRepository.findByAgentNameOrderByUpdatedAtDesc(agentInfo.getAgentName(), pagable);
   }
 
+  public TimeAgentInfo deleteTrigger() {
+    if (cancelTriggerOk()) {
+      setCurrentTrigger(null);
+    }
+    return agentInfo;
+  }
+
+  public TimeAgentInfo setTrigger(String value) {
+    if (CronSequenceGenerator.isValidExpression(value)) {
+      return setCurrentTrigger(value);
+    }
+    throw new TimeAgentRuntimeException(TimeAgentExceptionCause.INVALID_TRIGGER, String.format("invalid trigger: ", value));
+  }
+
+  public void run(TimeAgentArgument... arguments) {
+    agentRunnable.run(arguments);
+  }
+
+  @PostConstruct
+  public void initInfo() {
+    agentInfo = getCurrentInfo();
+    setCurrentTrigger(agentInfo.getCrontrigger());
+  }
+
+  @PostConstruct
+  public void initAgent() {
+    agentRunnable = new TimeAgentRunnable(new TimeAgentWorkflow(this, agent));
+  }
+
+  private boolean cancelTriggerOk() {
+    return future != null && !future.isCancelled() && future.cancel(false) || (future == null || future.isCancelled());
+  }
+
+  private TimeAgentInfo setCurrentTrigger(String value) {
+    if (cancelTriggerOk()) {
+      scheduleAgentWithTrigger(value);
+      return saveTrigger(value);
+    } else {
+      throw new TimeAgentRuntimeException(TimeAgentExceptionCause.CANCEL_TRIGGER, "trigger could not be cancelled");
+    }
+  }
+
+  private TimeAgentInfo getCurrentInfo() {
+    TimeAgentInfo agentInfo = agentInfoRepository.findTop1ByAgentNameAndStatusOrderByUpdatedAtDesc(agentValues.getAgentName(),
+        TimeAgentStatus.NOT_SET);
+    if (agentInfo == null) {
+      agentInfo = agentInfoRepository.findTop1ByAgentNameOrderByUpdatedAtDesc(agentValues.getAgentName());
+    }
+
+    if (agentInfo == null) {
+      agentInfo = new TimeAgentInfo(agentValues.getAgentName(), TimeAgentStatus.READY);
+    } else if (TimeAgentStatus.NOT_SET.equals(agentInfo.getStatus())) {
+      agentInfo.setStatus(TimeAgentStatus.READY);
+    } else {
+      agentInfo.init();
+    }
+
+    return agentInfo;
+  }
+
+  private void scheduleAgentWithTrigger(String trigger) {
+    if (!StringUtils.isEmpty(trigger)) {
+      future = scheduler.schedule(agentRunnable, new CronTrigger(trigger));
+    }
+  }
+
+  private TimeAgentInfo saveTrigger(String value) {
+    if (TimeAgentStatus.READY.equals(agentInfo.getStatus())) {
+      this.agentInfo.setCrontrigger(value);
+      return updateInfo();
+    } else {
+      TimeAgentInfo agentInfo = agentInfoRepository.findTop1ByAgentNameAndStatusOrderByUpdatedAtDesc(agentValues.getAgentName(),
+          TimeAgentStatus.NOT_SET);
+      if (agentInfo == null) {
+        agentInfo = new TimeAgentInfo(agentValues.getAgentName(), TimeAgentStatus.NOT_SET);
+      }
+      agentInfo.setCrontrigger(value);
+      return agentInfoRepository.save(agentInfo);
+    }
+  }
+
   private int validateSearchModel(TimeAgentInfoSearch searchModel) {
     int searchFlag = 1;
 
@@ -164,54 +249,4 @@ public class TimeAgentService {
 
     return searchFlag;
   }
-
-  public TimeAgentInfo deleteTrigger() {
-    if (future != null && !future.isCancelled()) {
-      if (future.cancel(false)) {
-        agentInfo.deleteCrontrigger();
-        updateInfo();
-      }
-    }
-    return agentInfo;
-  }
-
-  public TimeAgentInfo setTrigger(String value) {
-    if (CronSequenceGenerator.isValidExpression(value)) {
-      agentInfo.setCrontrigger(value);
-      updateInfo();
-
-      future = scheduler.schedule(agent, new CronTrigger(value));
-
-      return agentInfo;
-    }
-    throw new TimeAgentRuntimeException(TimeAgentExceptionCause.INVALID_TRIGGER, String.format("invalid trigger: ", value));
-  }
-
-  public void run(TimeAgentArgument... arguments) {
-    agent.run();
-  }
-
-  @PostConstruct
-  public void initInfo() {
-    TimeAgentInfo agentInfo = agentInfoRepository.findTop1ByAgentNameOrderByUpdatedAtDesc(agentValues.getAgentName());
-    if (agentInfo != null) {
-      this.agentInfo = agentInfo;
-      agentInfo.init();
-    } else {
-      this.agentInfo = new TimeAgentInfo(agentValues.getAgentName(), TimeAgentStatus.READY);
-    }
-    updateInfo();
-  }
-
-  @PostConstruct
-  public void initAgent() {
-    agent = new TimeAgentRunnable(new TimeAgent(this) {
-
-      @Override
-      protected void runImplementation(TimeAgentArgument... arguments) throws TimeAgentException {
-
-      }
-    });
-  }
-
 }

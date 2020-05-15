@@ -48,10 +48,10 @@ import lombok.NoArgsConstructor;
 public class TimeAgentProtocol extends TimeAgentModel {
   @ManyToOne(fetch = FetchType.LAZY)
   @JsonBackReference
-  @ApiModelProperty(value = "the corresponding info of the agent")
+  @ApiModelProperty(value = "the corresponding info of the agent", position = 4)
   private TimeAgentInfo info;
 
   @Getter
-  @ApiModelProperty(value = "a protocol message", example = "found 100 files")
+  @ApiModelProperty(value = "a protocol message", example = "found 100 files", position = 5)
   private String message;
 }

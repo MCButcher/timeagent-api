@@ -15,36 +15,44 @@
  */
 package org.smithx.timeagent.api.threads;
 
+import static org.junit.Assert.assertNull;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.smithx.timeagent.api.agent.TimeAgentWorkflow;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
 
-import lombok.Getter;
-
 /**
- * agent to run the implementation.
+ * testing the TimeAgentRunnable.
  *
  * @author norman schmidt {smithx}
- * @since 12.05.2020
+ * @since 14.05.2020
  * 
  */
-public class TimeAgentRunnable implements Runnable {
-  @Getter
-  private TimeAgentArgument[] arguments;
-  private TimeAgentWorkflow workflow;
+@MockitoSettings
+public class TimeAgentRunnableTest {
+  TimeAgentRunnable classUnderTest;
 
-  public TimeAgentRunnable(TimeAgentWorkflow workflow) {
-    this.workflow = workflow;
+  @Mock
+  TimeAgentWorkflow workflow;
+
+  @BeforeEach
+  void beforeEach() {
+    classUnderTest = new TimeAgentRunnable(workflow);
   }
 
-  public void run(TimeAgentArgument... arguments) {
-    this.arguments = arguments;
-    run();
-    this.arguments = null;
+  @Test
+  void testRunWithArguments() {
+    classUnderTest.run(new TimeAgentArgument("key", "value"));
+    assertNull(classUnderTest.getArguments());
   }
 
-  @Override
-  public void run() {
-    workflow.run(arguments);
+  @Test
+  void testRunWithoutArguments() {
+    classUnderTest.run();
+    assertNull(classUnderTest.getArguments());
   }
 
 }

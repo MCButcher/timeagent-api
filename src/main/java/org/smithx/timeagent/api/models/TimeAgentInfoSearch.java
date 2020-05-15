@@ -31,18 +31,18 @@ import lombok.Data;
 @Data
 @ApiModel(description = "search model for infos of the agent from the past")
 public class TimeAgentInfoSearch {
-  @ApiModelProperty(value = "limit for the search result (max. limit is set by 'timeagent.values.max-limit-search')", example = "20")
+  @ApiModelProperty(value = "limit for the search result (max. limit is set by 'timeagent.values.max-limit-search')", example = "20", position = 1)
   private int limit;
 
-  @ApiModelProperty(value = "user, who executed the agent", example = "x123456")
+  @ApiModelProperty(value = "user, who executed the agent", example = "x123456", position = 3)
   private String executor;
 
-  @ApiModelProperty(value = "from start time of the agent", example = "2020-01-01T12:00:00.000000")
+  @ApiModelProperty(value = "from start time of the agent", example = "2020-01-01T12:00:00.000000", position = 4)
   private LocalDateTime fromStartTimeExecution;
 
-  @ApiModelProperty(value = "to start time of the agent", example = "2020-01-01T12:00:00.000000")
+  @ApiModelProperty(value = "to start time of the agent", example = "2020-01-01T12:00:00.000000", position = 5)
   private LocalDateTime toStartTimeExecution;
 
-  @ApiModelProperty(value = "status of the agent", example = "FINISHED")
+  @ApiModelProperty(value = "status of the agent", example = "FINISHED", position = 2)
   private TimeAgentStatus status;
 }
