@@ -27,6 +27,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -77,7 +78,7 @@ public class TimeAgentInfo extends TimeAgentModel {
   @ApiModelProperty(value = "current status of the agent", example = "RUNNING", position = 5)
   private TimeAgentStatus status;
 
-  @OneToMany(mappedBy = "info", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "info", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   @JsonManagedReference
   @ApiModelProperty(value = "protocol entries of the agent for a certain status", position = 10)
   private List<TimeAgentProtocol> protocol = new ArrayList<>();

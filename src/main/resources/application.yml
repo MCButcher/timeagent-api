@@ -13,10 +13,10 @@ timeagent:
             url: "https://www.smithx.org"
             mail: mail@smithx.org
    datasource:
-      driver-class-name: org.h2.Driver
-      jdbcUrl: jdbc:h2:mem:db_timeagent;DB_CLOSE_DELAY=-1
-      username: sa
-      password: sa
+      driver-class-name: org.mariadb.jdbc.Driver
+      jdbcUrl: jdbc:mariadb://localhost:3306/timeagent
+      username: root
+      password: mariadb
 spring:
    jpa:
       show-sql: false

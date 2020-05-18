@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
 import org.smithx.timeagent.api.agent.TimeAgent;
 import org.smithx.timeagent.api.agent.TimeAgentRuntime;
@@ -96,15 +97,16 @@ public class TimeAgentService {
     agentRunnable.run(arguments);
   }
 
-  @PostConstruct
+  @Transactional
   public void initAgentInfo() {
     agentInfo = modelEngine.nextAgentInfo();
     scheduleTrigger(agentInfo.getCrontrigger());
   }
 
   @PostConstruct
-  public void initAgent() {
+  protected void initAgent() {
     agentRunnable = new TimeAgentRunnable(new TimeAgentRuntime(this, agent));
+    initAgentInfo();
   }
 
   private boolean cancelTriggerOk() {
