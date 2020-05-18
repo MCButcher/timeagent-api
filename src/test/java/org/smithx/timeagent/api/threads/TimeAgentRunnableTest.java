@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
-import org.smithx.timeagent.api.agent.TimeAgentWorkflow;
+import org.smithx.timeagent.api.agent.TimeAgentRuntime;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
 
 /**
@@ -36,7 +36,7 @@ public class TimeAgentRunnableTest {
   TimeAgentRunnable classUnderTest;
 
   @Mock
-  TimeAgentWorkflow workflow;
+  TimeAgentRuntime workflow;
 
   @BeforeEach
   void beforeEach() {

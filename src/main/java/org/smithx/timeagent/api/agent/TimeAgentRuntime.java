@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @AllArgsConstructor
 @Slf4j
-public class TimeAgentWorkflow {
+public class TimeAgentRuntime {
   private TimeAgentService service;
   private TimeAgent agent;
 
@@ -51,7 +51,7 @@ public class TimeAgentWorkflow {
         service.getAgentInfo().addProtocol(String.format("%s: %s", argument.getKey(), argument.getValue()));
       }
     }
-    service.updateInfo();
+    service.updateAgentInfo();
   }
 
   private void logError(TimeAgentException exception) {
@@ -69,33 +69,26 @@ public class TimeAgentWorkflow {
   }
 
   private void setStatusStart() {
-    log.info("start: " + service.getAgentInfo().getStatus());
     service.getAgentInfo().setStatus(TimeAgentStatus.RUNNING);
     service.getAgentInfo().setStartTimeExecution(LocalDateTime.now());
     service.getAgentInfo().clearProtocol();
-    service.updateInfo();
+    service.updateAgentInfo();
   }
 
   private void setStatusEnd(TimeAgentStatus status) {
-    log.info("finish: " + service.getAgentInfo().getStatus());
     service.getAgentInfo().setStatus(status);
     service.getAgentInfo().setFinishTimeExecution(LocalDateTime.now());
-    service.updateInfo();
-    log.info("end: " + service.getAgentInfo().getStatus());
+    service.updateAgentInfo();
   }
-
-//  abstract protected void runImplementation(TimeAgentArgument... arguments) throws TimeAgentException;
 
   public void run(TimeAgentArgument... arguments) {
     isAlreadyRunning();
     setStatusStart();
     logArguments(arguments);
     try {
-      log.info("start agent");
       agent.execute(service, arguments);
-      log.info("finish agent");
       setStatusEnd(TimeAgentStatus.FINISHED);
-      service.initInfo();
+      service.initAgentInfo();
     } catch (TimeAgentException exception) {
       logError(exception);
     }

@@ -21,7 +21,7 @@ import org.smithx.timeagent.api.services.TimeAgentService;
 import org.springframework.stereotype.Component;
 
 /**
- * TODO
+ * TODO remove again. only test implementation
  *
  * @author norman schmidt {smithx}
  * @since 14.05.2020
@@ -32,12 +32,12 @@ public class TimeAgentImpl extends TimeAgent {
 
   @Override
   public void execute(TimeAgentService service, TimeAgentArgument... arguments) throws TimeAgentException {
-    String text = "dijaio afhapiof8934ui4höfja";
+    String text = "abcdefghijklmnopqrstuvwxyz";
     for (int i = 0; i < 100000000; i++) {
-      text.replaceAll("afhapiof8934ui4", "xxxxx");
+      text.replaceAll("klm", "xxx");
       if (i % 1000000 == 0) {
         service.getAgentInfo().addProtocol(i + " done");
-        service.updateInfo();
+        service.updateAgentInfo();
       }
     }
   }

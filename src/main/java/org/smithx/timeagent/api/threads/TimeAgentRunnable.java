@@ -15,7 +15,7 @@
  */
 package org.smithx.timeagent.api.threads;
 
-import org.smithx.timeagent.api.agent.TimeAgentWorkflow;
+import org.smithx.timeagent.api.agent.TimeAgentRuntime;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
 
 import lombok.Getter;
@@ -30,9 +30,9 @@ import lombok.Getter;
 public class TimeAgentRunnable implements Runnable {
   @Getter
   private TimeAgentArgument[] arguments;
-  private TimeAgentWorkflow workflow;
+  private TimeAgentRuntime workflow;
 
-  public TimeAgentRunnable(TimeAgentWorkflow workflow) {
+  public TimeAgentRunnable(TimeAgentRuntime workflow) {
     this.workflow = workflow;
   }
 
