@@ -4,13 +4,13 @@ timeagent:
       max-limit-search: 50
       swagger:
          title: timeagent
-         description: "scheduled or manual execution of agents"
+         description: "Scheduled or manual execution of an agent and its implementation"
          version: 0.1.0-SNAPSHOT
          license: "Apache License, Version 2.0"
-         license-url: "https://www.apache.org/licenses/LICENSE-2.0"
+         license-url: https://www.apache.org/licenses/LICENSE-2.0
          contact:
             company: smithx
-            url: "https://www.smithx.org"
+            url: https://www.smithx.org
             mail: mail@smithx.org
    datasource:
       driver-class-name: org.mariadb.jdbc.Driver

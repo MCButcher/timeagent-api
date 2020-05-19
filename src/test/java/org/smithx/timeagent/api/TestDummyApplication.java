@@ -15,21 +15,21 @@
  */
 package org.smithx.timeagent.api;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * class to start the agent.
+ * testing the start of the dummy application.
  *
  * @author norman schmidt {smithx}
- * @since 07.05.2020
+ * @since 19.05.2020
  * 
  */
-@SpringBootApplication
-public class RunApplication {
+@SpringBootTest
+public class TestDummyApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(RunApplication.class, args);
-	}
+  @Test
+  void testContextLoad() {
 
+  }
 }
