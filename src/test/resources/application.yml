@@ -1,8 +1,0 @@
-timeagent:
-   values:
-      agent-name: dummy-agent
-   datasource:
-      driver-class-name: org.h2.Driver
-      jdbcUrl: jdbc:h2:mem:db_timeagent;DB_CLOSE_DELAY=-1
-      username: sa
-      password: sa

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.smithx.timeagent.api.configuration.TimeAgentMessages;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
 import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
@@ -57,13 +58,16 @@ public class TimeAgentSearchEngineTest {
   @Mock
   TimeAgentInfoRepository agentInfoRepository;
 
+  @Mock
+  TimeAgentMessages messages;
+
   PageRequest pagable;
   TimeAgentInfoSearch searchModel;
   List<TimeAgentInfo> resultList;
 
   @BeforeEach
   void beforeEach() {
-    classUnderTest = new TimeAgentSearchEngine(agentValues, agentInfoRepository);
+    classUnderTest = new TimeAgentSearchEngine(agentValues, agentInfoRepository, messages);
     pagable = PageRequest.of(0, MAX_SEARCH_VALUE);
     searchModel = new TimeAgentInfoSearch();
     resultList = Arrays.asList(new TimeAgentInfo());

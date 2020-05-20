@@ -68,7 +68,7 @@ public class TimeAgentInfoControllerTest extends TimeAgentControllerTest {
   void testGetInfo() throws Exception {
     when(service.getAgentInfo()).thenReturn(info);
 
-    MockHttpServletResponse response = mvc.perform(get("/info")).andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+    MockHttpServletResponse response = mvc.perform(get("/timeagent/info")).andExpect(status().is2xxSuccessful()).andReturn().getResponse();
     TimeAgentInfo mappedResponse = mapper.reader().forType(TimeAgentInfo.class).readValue(response.getContentAsString());
     assertAll("check timeagent info",
         () -> assertEquals(info.getAgentName(), mappedResponse.getAgentName()),
@@ -86,7 +86,8 @@ public class TimeAgentInfoControllerTest extends TimeAgentControllerTest {
     when(service.searchInfo(searchModel)).thenReturn(Arrays.asList(new TimeAgentInfo()));
 
     MockHttpServletResponse response = mvc
-        .perform(post("/info/search").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(searchModel)))
+        .perform(
+            post("/timeagent/info/search").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(searchModel)))
         .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
     List<TimeAgentInfo> mappedResponse = mapper.readValue(response.getContentAsString(), new TypeReference<List<TimeAgentInfo>>() {});
     assertEquals(1, mappedResponse.size());

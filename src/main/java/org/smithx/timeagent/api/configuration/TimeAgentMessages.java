@@ -13,35 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.smithx.timeagent.api.threads;
+package org.smithx.timeagent.api.configuration;
 
-import org.smithx.timeagent.api.agent.TimeAgentRuntime;
-import org.smithx.timeagent.api.models.TimeAgentArgument;
+import java.util.Locale;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
+
+import lombok.AllArgsConstructor;
 
 /**
- * agent to run the implementation.
+ * TODO
  *
  * @author norman schmidt {smithx}
- * @since 12.05.2020
+ * @since 19.05.2020
  * 
  */
-public class TimeAgentRunnable implements Runnable {
-  @Getter
-  @Setter
-  private TimeAgentArgument[] arguments;
-  private TimeAgentRuntime workflow;
+@Component
+@AllArgsConstructor
+public class TimeAgentMessages {
+  private MessageSource messages;
 
-  public TimeAgentRunnable(TimeAgentRuntime workflow) {
-    this.workflow = workflow;
+  public String getMessage(String key, Object... args) {
+    return messages.getMessage(key, args, Locale.getDefault());
   }
-
-  @Override
-  public void run() {
-    workflow.run(arguments);
-    this.arguments = null;
-  }
-
 }

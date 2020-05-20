@@ -47,13 +47,13 @@ public class TimeAgentAdminControllerTest extends TimeAgentControllerTest {
   void testRunWithArguments() throws Exception {
     TimeAgentArgument[] arguments = { new TimeAgentArgument("test", "123") };
 
-    mvc.perform(post("/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
+    mvc.perform(post("/timeagent/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
         .andExpect(status().is2xxSuccessful());
   }
 
   @Test
   void testRunWithoutArguments() throws Exception {
-    mvc.perform(post("/admin/run")).andExpect(status().is2xxSuccessful());
+    mvc.perform(post("/timeagent/admin/run")).andExpect(status().is2xxSuccessful());
   }
 
   @Test
@@ -61,25 +61,27 @@ public class TimeAgentAdminControllerTest extends TimeAgentControllerTest {
     TimeAgentArgument[] arguments = { new TimeAgentArgument("test", "123") };
 
     doThrow(new TimeAgentRuntimeException(TimeAgentExceptionCause.ALREADY_RUNNING, "running")).when(service).run(arguments);
-    mvc.perform(post("/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
+    mvc.perform(post("/timeagent/admin/run").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(arguments)))
         .andExpect(status().isUnprocessableEntity());
   }
 
   @Test
   void testSetTrigger() throws Exception {
-    mvc.perform(post("/admin/trigger").contentType(MediaType.TEXT_PLAIN).content("trigger")).andExpect(status().is2xxSuccessful());
+    mvc.perform(post("/timeagent/admin/trigger").contentType(MediaType.TEXT_PLAIN).content("trigger"))
+        .andExpect(status().is2xxSuccessful());
   }
 
   @Test
   void testSetInvalidTrigger() throws Exception {
     when(service.setTrigger(anyString()))
         .thenThrow(new TimeAgentRuntimeException(TimeAgentExceptionCause.INVALID_TRIGGER, "invalid trigger"));
-    mvc.perform(post("/admin/trigger").contentType(MediaType.TEXT_PLAIN).content("trigger")).andExpect(status().isNotAcceptable());
+    mvc.perform(post("/timeagent/admin/trigger").contentType(MediaType.TEXT_PLAIN).content("trigger"))
+        .andExpect(status().isNotAcceptable());
   }
 
   @Test
   void testDeleteTrigger() throws Exception {
-    mvc.perform(delete("/admin/trigger")).andExpect(status().is2xxSuccessful());
+    mvc.perform(delete("/timeagent/admin/trigger")).andExpect(status().is2xxSuccessful());
   }
 
 }

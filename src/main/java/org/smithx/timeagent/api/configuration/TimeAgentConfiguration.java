@@ -27,6 +27,7 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -44,6 +45,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * 
  */
 @Configuration
+@PropertySource("classpath:/timeagent.properties")
 @EnableSwagger2
 public class TimeAgentConfiguration {
   @Autowired

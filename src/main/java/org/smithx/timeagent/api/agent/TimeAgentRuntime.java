@@ -18,8 +18,6 @@ package org.smithx.timeagent.api.agent;
 import java.time.LocalDateTime;
 
 import org.smithx.timeagent.api.exceptions.TimeAgentException;
-import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
-import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
 import org.smithx.timeagent.api.services.TimeAgentService;
@@ -44,9 +42,9 @@ public class TimeAgentRuntime {
 
   private void logArguments(TimeAgentArgument... arguments) {
     if (arguments == null || arguments.length == 0) {
-      service.getAgentInfo().addProtocol("no arguments set");
+      service.getAgentInfo().addProtocol(service.getMessages().getMessage("protocol.arguments.none"));
     } else {
-      service.getAgentInfo().addProtocol("arguments are set:");
+      service.getAgentInfo().addProtocol(service.getMessages().getMessage("protocol.arguments.set"));
       for (TimeAgentArgument argument : arguments) {
         service.getAgentInfo().addProtocol(String.format("%s: %s", argument.getKey(), argument.getValue()));
       }
@@ -55,29 +53,27 @@ public class TimeAgentRuntime {
   }
 
   private void logError(TimeAgentException exception) {
-    setStatusEnd(TimeAgentStatus.ABORTED);
+    setStatusFinish(TimeAgentStatus.ABORTED);
     service.getAgentInfo().addProtocol(String.format("%s - %s", exception.getClass(), exception.getFullErrorMessage()));
-    log.error("an error while processing the agent occured:", exception);
+    log.error(service.getMessages().getMessage("exception.runtime.aborted"), exception);
   }
 
   private void isAlreadyRunning() {
-    if (TimeAgentStatus.RUNNING.equals(service.getAgentInfo().getStatus())) {
-      log.warn("agent is already running");
-      throw new TimeAgentRuntimeException(TimeAgentExceptionCause.ALREADY_RUNNING,
-          "the agent is already running since " + service.getAgentInfo().getStartTimeExecution());
-    }
+    service.isAlreadyRunning();
   }
 
   private void setStatusStart() {
     service.getAgentInfo().setStatus(TimeAgentStatus.RUNNING);
     service.getAgentInfo().setStartTimeExecution(LocalDateTime.now());
     service.getAgentInfo().clearProtocol();
+    log.info(service.getMessages().getMessage("log.agent.start", service.getAgentInfo()));
     service.updateAgentInfo();
   }
 
-  private void setStatusEnd(TimeAgentStatus status) {
+  private void setStatusFinish(TimeAgentStatus status) {
     service.getAgentInfo().setStatus(status);
     service.getAgentInfo().setFinishTimeExecution(LocalDateTime.now());
+    log.info(service.getMessages().getMessage("log.agent.finish", service.getAgentInfo()));
     service.updateAgentInfo();
   }
 
@@ -87,7 +83,7 @@ public class TimeAgentRuntime {
     logArguments(arguments);
     try {
       agent.execute(service, arguments);
-      setStatusEnd(TimeAgentStatus.FINISHED);
+      setStatusFinish(TimeAgentStatus.FINISHED);
       service.initAgentInfo();
     } catch (TimeAgentException exception) {
       logError(exception);

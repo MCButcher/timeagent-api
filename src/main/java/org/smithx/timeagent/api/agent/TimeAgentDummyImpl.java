@@ -13,35 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.smithx.timeagent.api.threads;
+package org.smithx.timeagent.api.agent;
 
-import org.smithx.timeagent.api.agent.TimeAgentRuntime;
+import org.smithx.timeagent.api.exceptions.TimeAgentException;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
-
-import lombok.Getter;
-import lombok.Setter;
+import org.smithx.timeagent.api.services.TimeAgentService;
+import org.springframework.stereotype.Component;
 
 /**
- * agent to run the implementation.
+ * implementation of a dummy agent.
  *
  * @author norman schmidt {smithx}
- * @since 12.05.2020
+ * @since 19.05.2020
  * 
  */
-public class TimeAgentRunnable implements Runnable {
-  @Getter
-  @Setter
-  private TimeAgentArgument[] arguments;
-  private TimeAgentRuntime workflow;
-
-  public TimeAgentRunnable(TimeAgentRuntime workflow) {
-    this.workflow = workflow;
-  }
+@Component
+public class TimeAgentDummyImpl extends TimeAgent {
 
   @Override
-  public void run() {
-    workflow.run(arguments);
-    this.arguments = null;
+  public void execute(TimeAgentService service, TimeAgentArgument... arguments) throws TimeAgentException {
+    service.getAgentInfo().addProtocol("i'm a dummy agent");
   }
 
 }

@@ -45,7 +45,9 @@ public class TimeAgentRunnableTest {
 
   @Test
   void testRunWithArguments() {
-    classUnderTest.run(new TimeAgentArgument("key", "value"));
+    TimeAgentArgument arguments[] = { new TimeAgentArgument("key", "value") };
+    classUnderTest.setArguments(arguments);
+    classUnderTest.run();
     assertNull(classUnderTest.getArguments());
   }
 

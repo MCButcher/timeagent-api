@@ -16,7 +16,6 @@
 package org.smithx.timeagent.api.agent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -24,9 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+import org.smithx.timeagent.api.configuration.TimeAgentMessages;
 import org.smithx.timeagent.api.exceptions.TimeAgentException;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
-import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
@@ -49,25 +48,23 @@ public class TimeAgentRuntimeTest {
   @Mock
   TimeAgent agent;
 
+  @Mock
+  TimeAgentMessages messages;
+
   TimeAgentInfo agentInfo;
 
   @BeforeEach
   void beforeEach() {
     classUnderTest = new TimeAgentRuntime(service, agent);
     agentInfo = new TimeAgentInfo();
+
+    when(service.getMessages()).thenReturn(messages);
     when(service.getAgentInfo()).thenReturn(agentInfo);
   }
 
   @Test
   void testRunWithArguments() {
     classUnderTest.run(new TimeAgentArgument("key", "value"));
-  }
-
-  @Test
-  void testAlreadyRunning() {
-    agentInfo.setStatus(TimeAgentStatus.RUNNING);
-    TimeAgentRuntimeException exception = assertThrows(TimeAgentRuntimeException.class, () -> classUnderTest.run());
-    assertEquals(TimeAgentExceptionCause.ALREADY_RUNNING, exception.getErrorCause());
   }
 
   @Test

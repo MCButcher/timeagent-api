@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.smithx.timeagent.api.configuration.TimeAgentMessages;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
@@ -54,9 +55,12 @@ public class TimeAgentModelEngineTest {
   @Mock
   TimeAgentInfoRepository agentInfoRepository;
 
+  @Mock
+  TimeAgentMessages messages;
+
   @BeforeEach
   void beforeEach() {
-    classUnderTest = new TimeAgentModelEngine(agentValues, agentInfoRepository);
+    classUnderTest = new TimeAgentModelEngine(agentValues, agentInfoRepository, messages);
     when(agentValues.getAgentName()).thenReturn(AGENTNAME);
   }
 

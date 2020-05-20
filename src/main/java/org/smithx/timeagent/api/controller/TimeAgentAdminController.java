@@ -39,7 +39,7 @@ import lombok.AllArgsConstructor;
  */
 @RestController
 @AllArgsConstructor
-@RequestMapping(path = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/timeagent/admin", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TimeAgentAdminController {
   private TimeAgentService service;
 

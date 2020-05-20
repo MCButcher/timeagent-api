@@ -23,6 +23,7 @@ import javax.transaction.Transactional;
 
 import org.smithx.timeagent.api.agent.TimeAgent;
 import org.smithx.timeagent.api.agent.TimeAgentRuntime;
+import org.smithx.timeagent.api.configuration.TimeAgentMessages;
 import org.smithx.timeagent.api.engines.TimeAgentModelEngine;
 import org.smithx.timeagent.api.engines.TimeAgentSearchEngine;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
@@ -30,12 +31,16 @@ import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
 import org.smithx.timeagent.api.models.TimeAgentArgument;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentInfoSearch;
+import org.smithx.timeagent.api.models.TimeAgentStatus;
 import org.smithx.timeagent.api.threads.TimeAgentRunnable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * service for accessing the agent and its administration.
@@ -45,22 +50,27 @@ import org.springframework.util.StringUtils;
  * 
  */
 @Service
+@Slf4j
 public class TimeAgentService {
   private TimeAgent agent;
   private TimeAgentInfo agentInfo;
   private TimeAgentModelEngine modelEngine;
   private TimeAgentSearchEngine searchEngine;
 
+  @Getter
+  private TimeAgentMessages messages;
+
   private TimeAgentRunnable agentRunnable;
   private ThreadPoolTaskScheduler scheduler;
   private ScheduledFuture<?> future;
 
   public TimeAgentService(TimeAgent agent, TimeAgentModelEngine modelEngine, TimeAgentSearchEngine searchEngine,
-      ThreadPoolTaskScheduler scheduler) {
+      ThreadPoolTaskScheduler scheduler, TimeAgentMessages messages) {
     this.agent = agent;
     this.modelEngine = modelEngine;
     this.searchEngine = searchEngine;
     this.scheduler = scheduler;
+    this.messages = messages;
   }
 
   public TimeAgentInfo getAgentInfo() {
@@ -73,11 +83,17 @@ public class TimeAgentService {
   }
 
   public List<TimeAgentInfo> searchInfo(TimeAgentInfoSearch searchModel) {
+    if (log.isDebugEnabled()) {
+      log.debug(messages.getMessage("log.search", searchModel));
+    }
     return searchEngine.searchAgentInfo(searchModel);
   }
 
   public TimeAgentInfo deleteTrigger() {
     if (cancelTriggerOk()) {
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.delete.trigger"));
+      }
       return modelEngine.saveTriggerToAgentInfo(null, this.agentInfo);
     }
     throw new TimeAgentRuntimeException(TimeAgentExceptionCause.CANCEL_TRIGGER, "error on trigger cancellation");
@@ -94,13 +110,26 @@ public class TimeAgentService {
   }
 
   public void run(TimeAgentArgument... arguments) {
-    agentRunnable.run(arguments);
+    isAlreadyRunning();
+    agentRunnable.setArguments(arguments);
+    new Thread(agentRunnable).start();
   }
 
   @Transactional
   public void initAgentInfo() {
     agentInfo = modelEngine.nextAgentInfo();
     scheduleTrigger(agentInfo.getCrontrigger());
+    if (log.isDebugEnabled()) {
+      log.debug(messages.getMessage("log.init.agent", agentInfo));
+    }
+  }
+
+  public void isAlreadyRunning() {
+    if (TimeAgentStatus.RUNNING.equals(agentInfo.getStatus())) {
+      log.warn("agent is already running");
+      throw new TimeAgentRuntimeException(TimeAgentExceptionCause.ALREADY_RUNNING,
+          "the agent is already running since " + agentInfo.getStartTimeExecution());
+    }
   }
 
   @PostConstruct

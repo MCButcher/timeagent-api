@@ -17,6 +17,7 @@ package org.smithx.timeagent.api.engines;
 
 import java.util.List;
 
+import org.smithx.timeagent.api.configuration.TimeAgentMessages;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
 import org.smithx.timeagent.api.exceptions.TimeAgentExceptionCause;
 import org.smithx.timeagent.api.exceptions.TimeAgentRuntimeException;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * search engine for validating the search model and execute the search on the
@@ -40,15 +42,21 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Component
+@Slf4j
 public class TimeAgentSearchEngine {
   private TimeAgentValues agentValues;
   private TimeAgentInfoRepository agentInfoRepository;
+  private TimeAgentMessages messages;
 
   public List<TimeAgentInfo> searchAgentInfo(TimeAgentInfoSearch searchModel) {
     int searchFlag = validateSearchModel(searchModel);
     String agentName = agentValues.getAgentName();
 
     PageRequest pagable = PageRequest.of(0, searchModel.getLimit());
+
+    if (log.isDebugEnabled()) {
+      log.debug(messages.getMessage("log.search.validate.end", searchModel, searchFlag));
+    }
 
     if (searchFlag > 30) {
       return agentInfoRepository.findByAgentNameAndStatusAndExecutorAndStartTimeExecutionBetweenOrderByUpdatedAtDesc(
@@ -117,23 +125,38 @@ public class TimeAgentSearchEngine {
     }
 
     if (searchModel.getLimit() <= 0 || searchModel.getLimit() > agentValues.getMaxLimitSearch()) {
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.search.validate.limit", searchModel.getLimit(), agentValues.getMaxLimitSearch()));
+      }
       searchModel.setLimit(agentValues.getMaxLimitSearch());
     }
 
     if (searchModel.getStatus() != null) {
       searchFlag = searchFlag + 2;
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.search.validate.status", searchModel.getStatus(), searchFlag));
+      }
     }
 
     if (searchModel.getExecutor() != null) {
       searchFlag = searchFlag + 4;
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.search.validate.executor", searchModel.getExecutor(), searchFlag));
+      }
     }
 
     if (searchModel.getFromStartTimeExecution() != null) {
       searchFlag = searchFlag + 8;
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.search.validate.to.startTime", searchModel.getFromStartTimeExecution(), searchFlag));
+      }
     }
 
     if (searchModel.getToStartTimeExecution() != null) {
       searchFlag = searchFlag + 16;
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.search.validate.from.startTime", searchModel.getToStartTimeExecution(), searchFlag));
+      }
     }
 
     return searchFlag;

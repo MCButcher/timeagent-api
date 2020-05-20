@@ -15,6 +15,7 @@
  */
 package org.smithx.timeagent.api.engines;
 
+import org.smithx.timeagent.api.configuration.TimeAgentMessages;
 import org.smithx.timeagent.api.configuration.TimeAgentValues;
 import org.smithx.timeagent.api.models.TimeAgentInfo;
 import org.smithx.timeagent.api.models.TimeAgentStatus;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * engine to create, get or update the next or current agent info model.
@@ -34,26 +36,43 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Component
+@Slf4j
 public class TimeAgentModelEngine {
   private TimeAgentValues agentValues;
   private TimeAgentInfoRepository agentInfoRepository;
+  private TimeAgentMessages messages;
 
   public TimeAgentInfo nextAgentInfo() {
     // find info with status NOT_SET
     TimeAgentInfo agentInfo = agentInfoRepository.findTop1ByAgentNameAndStatusOrderByUpdatedAtDesc(agentValues.getAgentName(),
         TimeAgentStatus.NOT_SET);
 
+    if (log.isDebugEnabled()) {
+      log.debug(messages.getMessage("log.next.agent.notSet", agentInfo));
+    }
     if (agentInfo == null) {
       // find last info
       agentInfo = agentInfoRepository.findTop1ByAgentNameOrderByUpdatedAtDesc(agentValues.getAgentName());
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.next.agent.lastEntry", agentInfo));
+      }
     }
 
     if (agentInfo == null) {
       agentInfo = createAgentInfo();
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.next.agent.created", agentInfo));
+      }
     } else if (TimeAgentStatus.NOT_SET.equals(agentInfo.getStatus())) {
       agentInfo.setStatus(TimeAgentStatus.READY);
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.next.agent.notSet.init", agentInfo.getStatus()));
+      }
     } else {
       agentInfo.init();
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.next.agent.lastEntry.init", agentInfo));
+      }
     }
 
     updateAgentInfo(agentInfo);
@@ -64,6 +83,9 @@ public class TimeAgentModelEngine {
   public TimeAgentInfo saveTriggerToAgentInfo(String trigger, TimeAgentInfo currentAgentInfo) {
     if (TimeAgentStatus.READY.equals(currentAgentInfo.getStatus())) {
       currentAgentInfo.setCrontrigger(trigger);
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.next.agent.trigger.current", currentAgentInfo.getCrontrigger()));
+      }
       return updateAgentInfo(currentAgentInfo);
 
     } else {
@@ -75,6 +97,9 @@ public class TimeAgentModelEngine {
       }
 
       agentInfo.setCrontrigger(trigger);
+      if (log.isDebugEnabled()) {
+        log.debug(messages.getMessage("log.next.agent.trigger.new", agentInfo.getCrontrigger()));
+      }
       return updateAgentInfo(agentInfo);
     }
   }

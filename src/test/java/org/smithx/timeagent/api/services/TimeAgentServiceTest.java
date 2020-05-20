@@ -30,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.smithx.timeagent.api.agent.TimeAgent;
+import org.smithx.timeagent.api.configuration.TimeAgentMessages;
 import org.smithx.timeagent.api.engines.TimeAgentModelEngine;
 import org.smithx.timeagent.api.engines.TimeAgentSearchEngine;
 import org.smithx.timeagent.api.exceptions.TimeAgentException;
@@ -65,6 +66,9 @@ public class TimeAgentServiceTest {
   @Mock
   TimeAgentModelEngine modelEngine;
 
+  @Mock
+  TimeAgentMessages messages;
+
   TimeAgentInfo initAgentInfo;
 
   @BeforeEach
@@ -73,7 +77,7 @@ public class TimeAgentServiceTest {
 
     when(modelEngine.nextAgentInfo()).thenReturn(initAgentInfo);
 
-    serviceUnderTest = new TimeAgentService(agent, modelEngine, searchEngine, scheduler);
+    serviceUnderTest = new TimeAgentService(agent, modelEngine, searchEngine, scheduler, messages);
     serviceUnderTest.initAgentInfo();
   }
 
@@ -129,6 +133,13 @@ public class TimeAgentServiceTest {
     when(modelEngine.updateAgentInfo(any(TimeAgentInfo.class))).thenReturn(initAgentInfo);
 
     serviceUnderTest.run();
+  }
+
+  @Test
+  void testAlreadyRunning() {
+    serviceUnderTest.getAgentInfo().setStatus(TimeAgentStatus.RUNNING);
+    TimeAgentRuntimeException exception = assertThrows(TimeAgentRuntimeException.class, () -> serviceUnderTest.run());
+    assertEquals(TimeAgentExceptionCause.ALREADY_RUNNING, exception.getErrorCause());
   }
 
   @Test

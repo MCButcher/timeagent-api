@@ -17,6 +17,7 @@ package org.smithx.timeagent.api.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import lombok.Data;
 
@@ -28,8 +29,9 @@ import lombok.Data;
  * 
  */
 @Configuration
-@Data
+@PropertySource("classpath:/timeagent.properties")
 @ConfigurationProperties(prefix = "timeagent.values")
+@Data
 public class TimeAgentValues {
   private String agentName;
   private int maxLimitSearch;
